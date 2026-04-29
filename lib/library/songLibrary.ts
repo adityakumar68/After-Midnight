@@ -18,6 +18,10 @@ const LRU_CAP = 20;
 interface LibraryStore {
   baked: LibrarySong[];
   generated: LibrarySong[];
+  /** id of the most-recently-generated song (in this session). Display layer uses this so
+   *  only the freshly-baked one shows "WRITTEN FOR YOU"; older generated tracks settle
+   *  into "FROM THE STACKS" alongside the original baked library. */
+  latestGeneratedId: string | null;
   all: () => LibrarySong[];
   find: (freeform: string) => LibrarySong | null;
   addGenerated: (s: LibrarySong) => void;
@@ -38,6 +42,7 @@ export function createLibraryStore(opts: { persist: boolean } = { persist: true 
   return create<LibraryStore>((set, get) => ({
     baked: BAKED,
     generated: [],
+    latestGeneratedId: null,
     all: () => [...get().baked, ...get().generated],
     find: (freeform) => {
       const cn = canonicalizeVibe(freeform);
@@ -55,7 +60,7 @@ export function createLibraryStore(opts: { persist: boolean } = { persist: true 
     },
     addGenerated: (s) => {
       const next = [...get().generated, s].slice(-LRU_CAP);
-      set({ generated: next });
+      set({ generated: next, latestGeneratedId: s.id });
       if (opts.persist) persist(next);
     },
     hydrate: () => {

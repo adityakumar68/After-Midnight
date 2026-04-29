@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Booth, OnAirLamp } from "@/components/ui/atmosphere";
 import type { GameState } from "@/lib/game/machine";
+import type { LibrarySong } from "@/lib/library/songLibrary";
 
 type DesignCallState =
   | "idle" | "incoming" | "conversation" | "song_select" | "song_playing" | "caller_reaction";
@@ -33,12 +34,16 @@ export interface StudioMobileProps {
   onPushToTalkEnd?: () => void;
   onPickSong?: (id: string) => void;
   onCueSong?: () => void;
+  /** Full library (baked + generated). Optional — when provided, the stacks drawer is shown. */
+  library?: LibrarySong[];
+  latestGeneratedId?: string | null;
 }
 
 export default function StudioMobile({
   callState, caller, callerVuLevel, djVuLevel, songs,
   callIndex = 1, callTotal = 3, clock = "",
   onAnswer, onPushToTalkStart, onPushToTalkEnd, onPickSong, onCueSong,
+  library, latestGeneratedId,
 }: StudioMobileProps) {
   const [simCaller, setSimCaller] = useState(0);
   const [ptDown, setPtDown] = useState(false);
@@ -297,8 +302,56 @@ export default function StudioMobile({
             </button>
           </div>
         )}
+
+        {/* Stacks drawer — same library as Caller Mode. Visible always (when not picking). */}
+        {library && library.length > 0 && callState !== "song_select" && (
+          <StacksDrawer library={library} latestGeneratedId={latestGeneratedId ?? null} />
+        )}
       </main>
     </Booth>
+  );
+}
+
+function StacksDrawer({ library, latestGeneratedId }: {
+  library: LibrarySong[]; latestGeneratedId: string | null;
+}) {
+  const recent = library.slice().reverse().slice(0, 6);
+  return (
+    <section style={{
+      background: "#1a0f08",
+      border: "1px solid rgba(255,179,71,0.15)",
+      borderRadius: 8, padding: 10,
+      maxHeight: 180, overflowY: "auto",
+      display: "flex", flexDirection: "column", gap: 6,
+      WebkitOverflowScrolling: "touch",
+      marginTop: 8,
+    }}>
+      <span className="font-plex" style={{
+        fontSize: 10, letterSpacing: "0.32em", color: "var(--cream-30)",
+      }}>RECORD STACKS · {library.length}</span>
+      {recent.map((s) => {
+        const isFreshGen = s.id === latestGeneratedId;
+        return (
+          <div key={s.id} style={{
+            background: isFreshGen
+              ? "linear-gradient(180deg, #f2ead3 0%, #e6dcc0 100%)"
+              : "rgba(255,179,71,0.06)",
+            color: isFreshGen ? "#2a1a0f" : "var(--cream)",
+            padding: "6px 10px", borderRadius: 3,
+            border: "1px solid " + (isFreshGen ? "#c8b58a" : "rgba(255,179,71,0.18)"),
+            fontFamily: "var(--font-plex)", fontSize: 11,
+          }}>
+            <div style={{ fontWeight: 600 }}>{s.title}</div>
+            <div style={{
+              fontSize: 9, opacity: 0.6, letterSpacing: "0.2em",
+              textTransform: "uppercase", marginTop: 2,
+            }}>
+              {isFreshGen ? "+ WRITTEN FOR YOU" : "FROM THE STACKS"} · {s.freeformLabel}
+            </div>
+          </div>
+        );
+      })}
+    </section>
   );
 }
 

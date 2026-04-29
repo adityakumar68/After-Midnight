@@ -17,6 +17,7 @@ export interface CallerDesignProps {
   library: LibrarySong[];
   flashSongId: string | null;
   djName?: string;
+  latestGeneratedId?: string | null;
 }
 
 export default function CallerDesign({
@@ -24,6 +25,7 @@ export default function CallerDesign({
   onPtDown, onPtUp, onHangUp,
   pendingVibe, nowPlaying, library, flashSongId,
   djName = "DJ",
+  latestGeneratedId = null,
 }: CallerDesignProps) {
   const [simDj, setSimDj] = useState(0);
   useEffect(() => {
@@ -141,7 +143,7 @@ export default function CallerDesign({
               </div>
 
               <LibraryPanel library={library} flashSongId={flashSongId} pendingVibe={pendingVibe}
-                loading={callerState === "song_loading"} />
+                loading={callerState === "song_loading"} latestGeneratedId={latestGeneratedId} />
             </div>
 
             <Turntable visible={callerState === "song_playing"} song={nowPlaying} />
@@ -279,8 +281,8 @@ function PushToTalkButton({ enabled, ptDown, onDown, onUp }: {
   );
 }
 
-function LibraryPanel({ library, flashSongId, pendingVibe, loading }: {
-  library: LibrarySong[]; flashSongId: string | null; pendingVibe: string | null; loading: boolean;
+function LibraryPanel({ library, flashSongId, pendingVibe, loading, latestGeneratedId }: {
+  library: LibrarySong[]; flashSongId: string | null; pendingVibe: string | null; loading: boolean; latestGeneratedId: string | null;
 }) {
   return (
     <div style={{
@@ -310,14 +312,17 @@ function LibraryPanel({ library, flashSongId, pendingVibe, loading }: {
         )}
         {library.slice().reverse().map((s) => {
           const flash = s.id === flashSongId;
+          // Only the freshest generated song wears the "WRITTEN FOR YOU" cream paper.
+          // Previously generated tracks settle into the regular dark "FROM THE STACKS" treatment.
+          const isFreshGen = s.id === latestGeneratedId;
           return (
             <div key={s.id} style={{
-              background: s.origin === "generated"
+              background: isFreshGen
                 ? "linear-gradient(180deg, #f2ead3 0%, #e6dcc0 100%)"
                 : "rgba(255,179,71,0.06)",
-              color: s.origin === "generated" ? "#2a1a0f" : "var(--cream)",
+              color: isFreshGen ? "#2a1a0f" : "var(--cream)",
               padding: "8px 10px", borderRadius: 3,
-              border: "1px solid " + (s.origin === "generated" ? "#c8b58a" : "rgba(255,179,71,0.20)"),
+              border: "1px solid " + (isFreshGen ? "#c8b58a" : "rgba(255,179,71,0.20)"),
               fontFamily: "var(--font-plex)", fontSize: 12,
               boxShadow: flash ? "0 0 18px rgba(255,179,71,0.7)" : "none",
               transition: "box-shadow 350ms ease",
@@ -325,7 +330,7 @@ function LibraryPanel({ library, flashSongId, pendingVibe, loading }: {
             }}>
               <div style={{ fontWeight: 600, letterSpacing: "0.04em" }}>{s.title}</div>
               <div style={{ fontSize: 9, opacity: 0.6, letterSpacing: "0.2em", textTransform: "uppercase" }}>
-                {s.origin === "generated" ? "+ WRITTEN FOR YOU" : "FROM THE STACKS"} · {s.freeformLabel}
+                {isFreshGen ? "+ WRITTEN FOR YOU" : "FROM THE STACKS"} · {s.freeformLabel}
               </div>
             </div>
           );

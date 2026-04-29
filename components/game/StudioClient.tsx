@@ -12,6 +12,7 @@ import { attachMeter, type MeterTap } from "@/lib/audio/analyser";
 import { Sfx } from "@/lib/audio/sfx";
 import StudioDesign, { mapState } from "@/components/game/StudioDesign";
 import StudioMobile from "@/components/game/StudioMobile";
+import { useLibrary } from "@/lib/library/songLibrary";
 
 const VIBE_LABEL: Record<string, string> = {
   "dusty-country":         "Dusty Country",
@@ -33,6 +34,11 @@ export default function StudioClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const game = useGame();
+  // Subscribe to the same shared library used by Caller Mode.
+  const libBaked = useLibrary((s) => s.baked);
+  const libGenerated = useLibrary((s) => s.generated);
+  const latestGeneratedId = useLibrary((s) => s.latestGeneratedId);
+  const fullLibrary = useMemo(() => [...libBaked, ...libGenerated], [libBaked, libGenerated]);
 
   // Read ?n= querystring once on mount and configure total rounds
   useEffect(() => {
@@ -270,6 +276,8 @@ export default function StudioClient() {
           onPushToTalkEnd={onPushToTalkEnd}
           onPickSong={onPickSong}
           onCueSong={() => game.requestSong()}
+          library={fullLibrary}
+          latestGeneratedId={latestGeneratedId}
         />
       </div>
 

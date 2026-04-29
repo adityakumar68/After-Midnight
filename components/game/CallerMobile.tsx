@@ -17,6 +17,7 @@ export interface CallerMobileProps {
   library: LibrarySong[];
   flashSongId: string | null;
   djName?: string;
+  latestGeneratedId?: string | null;
 }
 
 export default function CallerMobile({
@@ -24,6 +25,7 @@ export default function CallerMobile({
   onPtDown, onPtUp, onHangUp,
   pendingVibe, nowPlaying, library, flashSongId,
   djName = "DJ",
+  latestGeneratedId,
 }: CallerMobileProps) {
   // Animated DJ VU level when none is provided
   const [simDj, setSimDj] = useState(0);
@@ -242,7 +244,7 @@ export default function CallerMobile({
         )}
 
         {/* LIBRARY PANEL — at the bottom */}
-        <LibraryDrawer library={library} flashSongId={flashSongId} />
+        <LibraryDrawer library={library} flashSongId={flashSongId} latestGeneratedId={latestGeneratedId ?? null} />
       </main>
     </Booth>
   );
@@ -362,8 +364,8 @@ function PencilWriting() {
   );
 }
 
-function LibraryDrawer({ library, flashSongId }: {
-  library: LibrarySong[]; flashSongId: string | null;
+function LibraryDrawer({ library, flashSongId, latestGeneratedId }: {
+  library: LibrarySong[]; flashSongId: string | null; latestGeneratedId: string | null;
 }) {
   const recent = library.slice().reverse().slice(0, 10);
   return (
@@ -386,15 +388,17 @@ function LibraryDrawer({ library, flashSongId }: {
       </div>
       {recent.map((s) => {
         const flash = s.id === flashSongId;
-        const generated = s.origin === "generated";
+        // Only the freshest generated song wears the "WRITTEN FOR YOU" cream paper.
+        // Previously generated tracks fade back into the regular dark "FROM THE STACKS" treatment.
+        const isFreshGen = s.id === latestGeneratedId;
         return (
           <div key={s.id} style={{
-            background: generated
+            background: isFreshGen
               ? "linear-gradient(180deg, #f2ead3 0%, #e6dcc0 100%)"
               : "rgba(255,179,71,0.06)",
-            color: generated ? "#2a1a0f" : "var(--cream)",
+            color: isFreshGen ? "#2a1a0f" : "var(--cream)",
             padding: "8px 10px", borderRadius: 3,
-            border: "1px solid " + (generated ? "#c8b58a" : "rgba(255,179,71,0.20)"),
+            border: "1px solid " + (isFreshGen ? "#c8b58a" : "rgba(255,179,71,0.20)"),
             fontFamily: "var(--font-plex)", fontSize: 12,
             boxShadow: flash ? "0 0 16px rgba(255,179,71,0.7)" : "none",
             transition: "box-shadow 350ms ease",
@@ -404,7 +408,7 @@ function LibraryDrawer({ library, flashSongId }: {
               fontSize: 9, opacity: 0.6, letterSpacing: "0.2em",
               textTransform: "uppercase", marginTop: 2,
             }}>
-              {generated ? "+ WRITTEN FOR YOU" : "FROM THE STACKS"} · {s.freeformLabel}
+              {isFreshGen ? "+ WRITTEN FOR YOU" : "FROM THE STACKS"} · {s.freeformLabel}
             </div>
           </div>
         );

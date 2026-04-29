@@ -37,6 +37,7 @@ export default function CallerClient() {
   // Subscribe to stable Zustand slices, concat in render
   const baked = lib((s) => s.baked);
   const generated = lib((s) => s.generated);
+  const latestGeneratedId = lib((s) => s.latestGeneratedId);
   const library = useMemo(() => [...baked, ...generated], [baked, generated]);
 
   useEffect(() => { lib.getState().hydrate(); }, [lib]);
@@ -245,6 +246,7 @@ export default function CallerClient() {
           library={library}
           flashSongId={flashId}
           djName={chosenDj?.name ?? "DJ"}
+          latestGeneratedId={latestGeneratedId}
         />
       </div>
       <div className="booth-mobile">
@@ -259,6 +261,7 @@ export default function CallerClient() {
           library={library}
           flashSongId={flashId}
           djName={chosenDj?.name ?? "DJ"}
+          latestGeneratedId={latestGeneratedId}
         />
       </div>
     </>
