@@ -7,6 +7,7 @@ import { useLibrary, type LibrarySong } from "@/lib/library/songLibrary";
 import { canonicalizeVibe, expandPrompt } from "@/lib/library/vibes";
 import { startDjSession, type AgentSession } from "@/lib/elevenlabs/agent";
 import { Sfx } from "@/lib/audio/sfx";
+import { DJS, type Dj } from "@/lib/game/djs";
 import CallerDesign from "@/components/game/CallerDesign";
 
 const TITLES = [
@@ -22,14 +23,15 @@ export default function CallerClient() {
   const lib = useLibrary;
 
   const [micGranted, setMicGranted] = useState(false);
+  const [chosenDj, setChosenDj] = useState<Dj | null>(null);
   const [recording, setRecording] = useState(false);
   const [flashId, setFlashId] = useState<string | null>(null);
   const [nowPlaying, setNowPlaying] = useState<LibrarySong | null>(null);
   const sessionRef = useRef<AgentSession | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const orchestrationStartedRef = useRef(false);
 
-  // Subscribe to the two stable underlying arrays — concat them in render via useMemo
-  // (avoids the infinite-loop trap of selecting a function-derived new array on each render)
+  // Subscribe to stable Zustand slices, concat in render
   const baked = lib((s) => s.baked);
   const generated = lib((s) => s.generated);
   const library = useMemo(() => [...baked, ...generated], [baked, generated]);
@@ -93,32 +95,39 @@ export default function CallerClient() {
     };
   }, [game, lib]);
 
+  // Orchestration: runs ONCE after a DJ is chosen. Uses a ref guard to prevent
+  // re-runs when state transitions cause this effect to re-evaluate.
   useEffect(() => {
-    if (!micGranted) return;
-    if (game.callerState !== "dialing") return;
+    if (!micGranted || !chosenDj) return;
+    if (orchestrationStartedRef.current) return;
+    orchestrationStartedRef.current = true;
+
     let cancelled = false;
     (async () => {
       Sfx.ring();
       await new Promise((r) => setTimeout(r, 2200));
       if (cancelled) return;
       game.dialingDone();
-      await new Promise((r) => setTimeout(r, 1200));
+      // Auto-pickup ~2 seconds after ringing starts
+      await new Promise((r) => setTimeout(r, 2000));
       if (cancelled) return;
       Sfx.stopAll(); Sfx.onair();
       game.ringingDone();
       try {
         sessionRef.current = await startDjSession({
-          events: { onError: (e) => console.error("[kai]", e) },
+          dj: chosenDj,
+          events: { onError: (e) => console.error("[dj]", e) },
           onPlaySong: handlePlaySong,
         });
         game.djSpoke();
       } catch (e) {
         console.error("DJ session failed", e);
+        // Fall through so the UI is still functional without a key
         game.djSpoke();
       }
     })();
     return () => { cancelled = true; };
-  }, [micGranted, game.callerState, handlePlaySong]);
+  }, [micGranted, chosenDj, handlePlaySong, game]);
 
   useEffect(() => {
     if (game.callerState !== "hung_up") return;
@@ -175,13 +184,17 @@ export default function CallerClient() {
               Allow mic to call in
             </h2>
             <p style={{ marginTop: 10, color: "var(--cream-60)", fontStyle: "italic" }}>
-              Kai will pick up. He&apos;ll hear what&apos;s keeping you up.
+              Pick a host. They&apos;ll hear what&apos;s keeping you up.
             </p>
             <button onClick={grantMic} className="btn-walnut" style={{ marginTop: 22 }}>
               Allow Mic
             </button>
           </div>
         </div>
+      )}
+
+      {micGranted && !chosenDj && (
+        <DjPicker djs={DJS} onPick={setChosenDj} />
       )}
 
       <CallerDesign
@@ -194,7 +207,85 @@ export default function CallerClient() {
         nowPlaying={nowPlaying}
         library={library}
         flashSongId={flashId}
+        djName={chosenDj?.name ?? "DJ"}
       />
     </>
+  );
+}
+
+function DjPicker({ djs, onPick }: { djs: Dj[]; onPick: (d: Dj) => void }) {
+  return (
+    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/85 p-6 backdrop-blur-sm">
+      <div style={{
+        maxWidth: 920, width: "100%",
+        padding: "36px 32px",
+        border: "1px solid rgba(255,179,71,0.4)",
+        background: "linear-gradient(180deg, #2A1A0F 0%, #1a0f08 100%)",
+        boxShadow: "0 18px 40px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,179,71,0.15)",
+        borderRadius: 10,
+      }}>
+        <div className="font-mono tracked" style={{
+          fontSize: 11, color: "var(--cream-60)", letterSpacing: "0.36em",
+          textAlign: "center", marginBottom: 6,
+        }}>
+          PICK A HOST
+        </div>
+        <h2 className="font-serif" style={{
+          fontSize: 32, color: "var(--cream)",
+          textAlign: "center", margin: 0, marginBottom: 28,
+        }}>
+          Who picks up tonight?
+        </h2>
+        <div style={{
+          display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+          gap: 16,
+        }}>
+          {djs.map((dj) => (
+            <button key={dj.id} onClick={() => onPick(dj)} style={{
+              cursor: "pointer",
+              background: "linear-gradient(180deg, #3a2515 0%, #2a1a0f 100%)",
+              color: "var(--cream)",
+              border: "1px solid rgba(255,179,71,0.25)",
+              borderRadius: 6,
+              padding: "20px 18px",
+              textAlign: "left",
+              transition: "all 200ms ease",
+              boxShadow: "inset 0 1px 0 rgba(255,179,71,0.10), 0 6px 14px rgba(0,0,0,0.4)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = "var(--amber)";
+              e.currentTarget.style.boxShadow = "inset 0 1px 0 rgba(255,179,71,0.2), 0 0 22px rgba(255,179,71,0.4)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = "rgba(255,179,71,0.25)";
+              e.currentTarget.style.boxShadow = "inset 0 1px 0 rgba(255,179,71,0.10), 0 6px 14px rgba(0,0,0,0.4)";
+            }}>
+              <div className="font-serif" style={{
+                fontSize: 32, color: "var(--cream)", marginBottom: 8,
+              }}>{dj.name}</div>
+              <div className="font-mono" style={{
+                fontSize: 11, color: "var(--amber)",
+                letterSpacing: "0.18em", textTransform: "uppercase",
+                marginBottom: 12,
+              }}>
+                {dj.id === "kai" ? "WARM HOST" : dj.id === "luna" ? "SULTRY HOST" : "COUNTRY HOST"}
+              </div>
+              <div style={{
+                fontSize: 13, color: "var(--cream-60)",
+                fontStyle: "italic", lineHeight: 1.4,
+              }}>
+                {dj.tagline}
+              </div>
+            </button>
+          ))}
+        </div>
+        <div className="font-mono tracked" style={{
+          fontSize: 10, color: "var(--cream-30)", letterSpacing: "0.32em",
+          textAlign: "center", marginTop: 24,
+        }}>
+          THEY&apos;LL PICK UP IN A FEW SECONDS
+        </div>
+      </div>
+    </div>
   );
 }

@@ -16,12 +16,14 @@ export interface CallerDesignProps {
   nowPlaying: LibrarySong | null;
   library: LibrarySong[];
   flashSongId: string | null;
+  djName?: string;
 }
 
 export default function CallerDesign({
   callerState, djLevel, ptDown,
   onPtDown, onPtUp, onHangUp,
   pendingVibe, nowPlaying, library, flashSongId,
+  djName = "DJ",
 }: CallerDesignProps) {
   const [simDj, setSimDj] = useState(0);
   useEffect(() => {
@@ -126,7 +128,7 @@ export default function CallerDesign({
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14 }}>
                 <VuMeter level={dl} />
                 <SpeakerGrille active={callerState === "conversation" || callerState === "outro" || callerState === "song_playing"} />
-                <LabelPlate primary="KAI" secondary="ON THE AIR" />
+                <LabelPlate primary={djName.toUpperCase()} secondary="ON THE AIR" />
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14 }}>
