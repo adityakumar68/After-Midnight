@@ -38,11 +38,13 @@ export default function LibraryClient() {
 
   return (
     <Booth>
-      <main style={{
+      <main data-library-scroll style={{
         position: "relative", zIndex: 10,
         maxWidth: 1100, margin: "0 auto",
         padding: "calc(var(--header-h) + 28px) 28px 80px",
         color: "var(--cream)",
+        overflowY: "auto",
+        minHeight: "100vh",
       }}>
         {/* Header */}
         <div style={{

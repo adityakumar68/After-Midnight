@@ -522,3 +522,31 @@ a { color: inherit; text-decoration: none; }
   transition: color 0.18s ease;
 }
 .app-header-navlink:hover { color: var(--amber); }
+
+/* ====================================================================
+   GLOBAL SCROLL — let any page scroll on mobile when content overflows.
+   Booth pages (/dj, /caller) keep fixed-canvas layout on desktop but
+   become scrollable on phones if their UI exceeds the viewport.
+   ==================================================================== */
+@media (max-width: 768px) {
+  html, body {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: auto !important;
+    min-height: 100% !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Mobile booth main containers: become scrollable instead of fixed */
+  .booth-mobile main {
+    position: static !important;
+    inset: auto !important;
+    min-height: 100vh;
+  }
+}
+
+/* Library page is naturally tall — let it scroll on every viewport */
+body:has(main[data-library-scroll]) {
+  overflow-y: auto;
+  height: auto;
+  min-height: 100%;
+}

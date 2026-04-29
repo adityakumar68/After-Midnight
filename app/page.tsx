@@ -47,29 +47,29 @@ export default function Landing() {
           </p>
 
           <div className="lnr-cta-row" style={{
-            display: "flex", gap: 18, alignItems: "stretch",
+            display: "flex", gap: 18, alignItems: "center",
             flexWrap: "wrap", justifyContent: "center",
             animation: "fade-up 1.2s 2.0s ease-out both",
           }}>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-              <button className="btn-walnut" onClick={() => router.push(`/dj?n=${n}`)}>
-                Be the DJ <span style={{ fontSize: 14, opacity: 0.7 }}>→</span>
-              </button>
-              <div style={{
-                display: "inline-flex", alignItems: "center", gap: 8,
-                fontSize: 11, color: "var(--cream-60)",
-                letterSpacing: "0.24em", fontFamily: "var(--font-mono)",
-              }}>
-                CALLERS TONIGHT
-                <button onClick={() => setN(Math.max(1, n - 1))} style={stepperBtn}>‹</button>
-                <span style={{ minWidth: 12, color: "var(--amber)", fontSize: 14 }}>{n}</span>
-                <button onClick={() => setN(Math.min(5, n + 1))} style={stepperBtn}>›</button>
-              </div>
-            </div>
-
+            <button className="btn-walnut" onClick={() => router.push(`/dj?n=${n}`)}>
+              Be the DJ <span style={{ fontSize: 14, opacity: 0.7 }}>→</span>
+            </button>
             <button className="btn-amber-outline" onClick={() => router.push("/caller")}>
               Be a Caller <span style={{ fontSize: 14, opacity: 0.7 }}>→</span>
             </button>
+          </div>
+
+          <div style={{
+            marginTop: 18,
+            display: "inline-flex", alignItems: "center", gap: 8,
+            fontSize: 11, color: "var(--cream-60)",
+            letterSpacing: "0.24em", fontFamily: "var(--font-mono)",
+            animation: "fade-up 1.2s 2.3s ease-out both",
+          }}>
+            CALLERS TONIGHT
+            <button onClick={() => setN(Math.max(1, n - 1))} style={stepperBtn}>‹</button>
+            <span style={{ minWidth: 12, color: "var(--amber)", fontSize: 14 }}>{n}</span>
+            <button onClick={() => setN(Math.min(5, n + 1))} style={stepperBtn}>›</button>
           </div>
 
           <div className="lnr-built-block" style={{
