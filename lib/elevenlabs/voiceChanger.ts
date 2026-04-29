@@ -1,13 +1,23 @@
 "use client";
 
-export async function transformToDjVoice(input: Blob): Promise<Blob> {
+const MIN_BYTES = 4_000; // ~150ms of opus audio; below this S2S returns 400
+
+export async function transformToDjVoice(input: Blob): Promise<Blob | null> {
+  if (input.size < MIN_BYTES) {
+    console.warn(`[voiceChanger] skipping — audio too short (${input.size} bytes)`);
+    return null;
+  }
   const buf = await input.arrayBuffer();
   const r = await fetch("/api/voice-change", {
     method: "POST",
     headers: { "Content-Type": "audio/webm" },
     body: buf,
   });
-  if (!r.ok) throw new Error(`Voice changer ${r.status}`);
+  if (!r.ok) {
+    let body = "";
+    try { body = await r.text(); } catch { /* ignore */ }
+    throw new Error(`Voice changer ${r.status}: ${body.slice(0, 300)}`);
+  }
   return await r.blob();
 }
 

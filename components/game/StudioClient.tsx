@@ -113,7 +113,9 @@ export default function StudioClient() {
     if (!recording || !recRef.current) return;
     setRecording(false);
     const raw = await recRef.current.stop();
-    transformToDjVoice(raw).then(playBlob).catch((e) => console.error("voice change failed", e));
+    transformToDjVoice(raw)
+      .then((blob) => { if (blob) return playBlob(blob); })
+      .catch((e) => console.error("voice change failed:", (e as Error).message));
   }, [recording]);
 
   // VU meter tick

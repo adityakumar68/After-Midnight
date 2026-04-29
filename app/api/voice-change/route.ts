@@ -9,8 +9,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Server not configured" }, { status: 500 });
   }
   const audio = await req.arrayBuffer();
-  if (!audio.byteLength) {
-    return NextResponse.json({ error: "Empty audio" }, { status: 400 });
+  if (audio.byteLength < 2000) {
+    return NextResponse.json({ error: `Audio too short (${audio.byteLength} bytes)` }, { status: 400 });
   }
   const form = new FormData();
   form.append("audio", new Blob([audio], { type: "audio/webm" }), "in.webm");
@@ -22,6 +22,7 @@ export async function POST(req: Request) {
   );
   if (!r.ok || !r.body) {
     const errBody = await r.text().catch(() => "");
+    console.error(`[voice-change] ElevenLabs ${r.status}:`, errBody.slice(0, 400));
     return NextResponse.json({ error: `ElevenLabs ${r.status}: ${errBody.slice(0, 200)}` }, { status: 502 });
   }
   return new Response(r.body, {

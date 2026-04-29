@@ -18,12 +18,15 @@ export async function createRecorder(mimeType = "audio/webm;codecs=opus"): Promi
       chunks = [];
       rec = new MediaRecorder(stream, { mimeType });
       rec.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
-      rec.start(250);
+      // 50ms timeslice so even very short PTT presses capture at least one chunk
+      rec.start(50);
     },
     stop: () =>
       new Promise<Blob>((resolve) => {
         if (!rec) return resolve(new Blob());
         rec.onstop = () => resolve(new Blob(chunks, { type: mimeType }));
+        // Force a final dataavailable event before stopping so trailing audio is captured
+        try { rec.requestData(); } catch { /* ignore */ }
         rec.stop();
       }),
   };
