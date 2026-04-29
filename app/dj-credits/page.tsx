@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useGame } from "@/lib/game/machine";
 import { Booth, Typewriter } from "@/components/ui/atmosphere";
+import { sharePayload } from "@/lib/share/share";
 
 const FALLBACK = [
   { time: "03:12 AM", name: "TOM",  age: 47, location: "NEBRASKA", songVibe: "Dusty Country" },
@@ -41,15 +42,26 @@ export default function CreditsPage() {
     return () => cancelAnimationFrame(raf);
   }, []);
 
-  const handleShare = () => {
-    const text = "I just spent an hour as a 3 AM radio DJ. Built with @zeddotdev + @elevenlabsio for #ElevenHacks 🎙️📻";
+  const [shareMsg, setShareMsg] = useState<string | null>(null);
+  const [sharing, setSharing] = useState(false);
+
+  const handleShare = async () => {
+    if (sharing) return;
+    setSharing(true);
+    setShareMsg(null);
+    // Enrich the tweet with the actual show log so it reads like a real playlist
+    // instead of a generic blurb. Caps at 3 lines so the body stays tweetable.
+    const lines = callsCompleted.slice(0, 3).map((c) => `· ${c.time} — ${c.name} (${c.location}) → "${c.songVibe}"`);
+    const opener = "I spent an hour as a 3 AM radio DJ. Tonight's playlist:";
+    const tail = "Built with @zeddotdev + @elevenlabsio for #ElevenHacks 🎙️📻";
+    const text = `${opener}\n${lines.join("\n")}\n${tail}`;
     const url = typeof window !== "undefined" ? window.location.href : "";
-    if (typeof navigator !== "undefined" && (navigator as Navigator & { share?: (data: ShareData) => Promise<void> }).share && /Mobi|Android/i.test(navigator.userAgent)) {
-      (navigator as Navigator & { share: (data: ShareData) => Promise<void> }).share({ title: "After Midnight", text, url }).catch(() => {});
-    } else {
-      const tweet = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
-      window.open(tweet, "_blank", "noopener,noreferrer");
-    }
+    const result = await sharePayload({ text, url });
+    setSharing(false);
+    if (result === "shared-text" || result === "shared-with-file") setShareMsg("Shared.");
+    else if (result === "tweeted") setShareMsg("Opened X with your playlist.");
+    else if (result === "cancelled") setShareMsg(null);
+    else setShareMsg("Couldn't share — try again.");
   };
 
   const onPlayAgain = () => {
@@ -205,13 +217,22 @@ export default function CreditsPage() {
             <button className="btn-walnut" onClick={onPlayAgain}>
               Record Another Night
             </button>
-            <button className="btn-amber-outline" onClick={handleShare}>
-              Share the Show
+            <button className="btn-amber-outline" onClick={handleShare} disabled={sharing}>
+              {sharing ? "Sharing…" : "Share the Show"}
             </button>
             <button className="btn-walnut" onClick={() => { game.reset(); router.push("/"); }}>
               Back to Home
             </button>
           </div>
+
+          {shareMsg && (
+            <p className="font-mono" style={{
+              marginTop: 12,
+              fontSize: 11,
+              color: "var(--cream-60)",
+              letterSpacing: "0.06em",
+            }}>{shareMsg}</p>
+          )}
 
           <div className="font-mono" style={{
             marginTop: 56,

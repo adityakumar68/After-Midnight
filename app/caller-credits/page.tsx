@@ -1,14 +1,61 @@
 "use client";
 import Link from "next/link";
+import { useMemo, useState } from "react";
 import { useCallerGame } from "@/lib/game/callerMachine";
+import { useLibrary } from "@/lib/library/songLibrary";
 import { Booth, Typewriter } from "@/components/ui/atmosphere";
+import { sharePayload, downloadAudio, safeFilename } from "@/lib/share/share";
 
 export default function CallerCredits() {
   const game = useCallerGame();
-  const tweet = encodeURIComponent(
-    "I called into After Midnight at 3 AM and Kai (an AI DJ) wrote a song just for me. Built with @zeddotdev + @elevenlabsio for #ElevenHacks 🎙️📻"
-  );
   const last = game.history.at(-1);
+
+  const allSongs = useLibrary((s) => [...s.baked, ...s.generated]);
+  const lastSong = useMemo(
+    () => (last ? allSongs.find((s) => s.id === last.songId) ?? null : null),
+    [allSongs, last]
+  );
+
+  const [shareMsg, setShareMsg] = useState<string | null>(null);
+  const [busy, setBusy] = useState<"share" | "download" | null>(null);
+
+  const tweetText = last
+    ? `Kai wrote me a song at 3 AM. "${last.songTitle}" — ${last.vibe}. Built with @zeddotdev + @elevenlabsio for #ElevenHacks 🎙️📻`
+    : "I called into After Midnight at 3 AM. Built with @zeddotdev + @elevenlabsio for #ElevenHacks 🎙️📻";
+
+  const onShare = async () => {
+    if (busy) return;
+    setBusy("share");
+    setShareMsg(null);
+    const result = await sharePayload({
+      text: tweetText,
+      audioSrc: lastSong?.src && lastSong.origin === "generated" ? lastSong.src : undefined,
+      filename: last ? safeFilename(last.songTitle) : "after-midnight.mp3",
+    });
+    setBusy(null);
+    if (result === "shared-with-file") setShareMsg("Shared — your song's attached.");
+    else if (result === "shared-text") setShareMsg("Shared.");
+    else if (result === "tweeted") setShareMsg("Opened X — paste your song link there.");
+    else if (result === "cancelled") setShareMsg(null);
+    else setShareMsg("Couldn't share. Try Download instead.");
+  };
+
+  const onDownload = async () => {
+    if (busy || !lastSong?.src) return;
+    setBusy("download");
+    setShareMsg(null);
+    try {
+      await downloadAudio(lastSong.src, safeFilename(last!.songTitle));
+      setShareMsg("Saved to your downloads.");
+    } catch {
+      setShareMsg("Couldn't download — the song may have expired with the page.");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const canDownload = !!lastSong?.src && lastSong.origin === "generated";
+
   return (
     <Booth dim>
       <main className="relative z-10 mx-auto max-w-[600px] px-6 py-24 text-center">
@@ -42,13 +89,39 @@ export default function CallerCredits() {
           <Link href="/caller" onClick={() => game.reset()} className="btn-walnut">
             Call Again
           </Link>
-          <a href={`https://twitter.com/intent/tweet?text=${tweet}`} target="_blank" rel="noopener noreferrer" className="btn-amber-outline">
-            Share This Night
-          </a>
+          <button
+            type="button"
+            onClick={onShare}
+            disabled={busy !== null}
+            className="btn-amber-outline"
+            style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
+          >
+            <ShareIcon />
+            {busy === "share" ? "Sharing…" : "Share This Song"}
+          </button>
+          {canDownload && (
+            <button
+              type="button"
+              onClick={onDownload}
+              disabled={busy !== null}
+              className="btn-amber-outline"
+              style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
+            >
+              <DownloadIcon />
+              {busy === "download" ? "Saving…" : "Download Song"}
+            </button>
+          )}
           <Link href="/" onClick={() => game.reset()} className="btn-walnut">
             Back to Home
           </Link>
         </div>
+
+        {shareMsg && (
+          <p className="mt-3 text-[12px]" style={{ color: "var(--cream-60)", letterSpacing: "0.04em" }}>
+            {shareMsg}
+          </p>
+        )}
+
         <div className="mt-6">
           <Link href="/library" className="btn-amber-outline">
             Browse Library
@@ -60,5 +133,24 @@ export default function CallerCredits() {
         </p>
       </main>
     </Booth>
+  );
+}
+
+function ShareIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+      <polyline points="16 6 12 2 8 6" />
+      <line x1="12" y1="2" x2="12" y2="15" />
+    </svg>
+  );
+}
+function DownloadIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" y1="15" x2="12" y2="3" />
+    </svg>
   );
 }
