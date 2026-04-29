@@ -42,3 +42,6 @@ media/video/assets/platform-*.mp4
 
 # Raw Gemini-generated images (renamed copies live in media/video/assets/)
 images-midnight/
+
+# User's local content drop folder (sources for AI-generated assets)
+midnight-content/

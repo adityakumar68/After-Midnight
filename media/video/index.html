@@ -21,8 +21,8 @@
   html, body { margin: 0; padding: 0; background: #000; font-family: 'Inter', system-ui, sans-serif; color: var(--cream); }
 
   [data-composition-id="root"] {
-    width: 1080px;
-    height: 1920px;
+    width: 1920px;
+    height: 1080px;
     position: relative;
     overflow: hidden;
     background: var(--vinyl);
@@ -83,17 +83,17 @@
     object-fit: cover;
   }
 
-  /* Caption block — bottom-centered for vertical, generous side margins */
+  /* Caption block — bottom-centered for landscape, generous side margins */
   .caption {
     position: absolute;
-    left: 60px; right: 60px;
-    bottom: 220px;
+    left: 120px; right: 120px;
+    bottom: 110px;
     text-align: center;
     z-index: 30;
   }
   .caption .line {
     font-family: 'DM Serif Display', Georgia, serif;
-    font-size: 64px;
+    font-size: 78px;
     font-style: italic;
     color: var(--cream);
     line-height: 1.18;
@@ -103,7 +103,7 @@
   .caption .tag {
     margin-top: 24px;
     font-family: 'VT323', 'IBM Plex Mono', monospace;
-    font-size: 32px;
+    font-size: 38px;
     letter-spacing: 0.32em;
     text-transform: uppercase;
     color: var(--amber);
@@ -176,15 +176,15 @@
   }
   .title-card .pretitle {
     font-family: 'VT323', monospace;
-    font-size: 32px;
+    font-size: 36px;
     letter-spacing: 0.36em;
     color: var(--cream-60);
     text-transform: uppercase;
-    margin-bottom: 36px;
+    margin-bottom: 28px;
   }
   .title-card .hero {
     font-family: 'DM Serif Display', Georgia, serif;
-    font-size: 132px;
+    font-size: 200px;
     color: var(--cream);
     margin: 0;
     line-height: 0.95;
@@ -192,20 +192,20 @@
     white-space: nowrap;
   }
   .title-card .sub {
-    margin-top: 32px;
+    margin-top: 36px;
     font-family: 'Inter', sans-serif;
-    font-size: 30px;
+    font-size: 32px;
     font-style: italic;
     color: var(--cream-60);
-    max-width: 800px;
+    max-width: 1000px;
   }
   .title-card .lamp-line {
-    margin-bottom: 60px;
+    margin-bottom: 48px;
     display: inline-flex; align-items: center; gap: 18px;
   }
   .title-card .lamp-line span {
     font-family: 'VT323', monospace;
-    font-size: 36px;
+    font-size: 38px;
     letter-spacing: 0.28em;
     color: var(--on-air);
     text-shadow: 0 0 12px rgba(229,75,60,0.6);
@@ -224,8 +224,8 @@
   }
   .closing h2 {
     font-family: 'DM Serif Display', Georgia, serif;
-    font-size: 124px;
-    margin: 0 0 60px;
+    font-size: 192px;
+    margin: 0 0 50px;
     color: var(--cream);
     line-height: 0.9;
     white-space: nowrap;
@@ -250,7 +250,7 @@
 </head>
 <body>
 
-<div data-composition-id="root" data-width="1080" data-height="1920" data-start="0" data-duration="90">
+<div data-composition-id="root" data-width="1920" data-height="1080" data-start="0" data-duration="90">
 
   <!-- Persistent atmosphere layers -->
   <div class="booth-vignette"></div>
@@ -260,9 +260,14 @@
     SCENE 1 — Anime city window — 0:00–0:08
     "It's three fourteen in the morning."
   -->
-  <div id="scene-1" class="scene clip"
-       data-start="0" data-duration="8" data-track-index="1">
-    <img src="assets/anime-1.jpg" alt="" id="scene-1-img" data-layout-allow-overflow />
+  <video src="assets/anime-1.mp4" id="scene-1-video" muted playsinline
+         class="clip"
+         data-start="0" data-duration="8" data-track-index="1"
+         data-layout-allow-overflow
+         style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:10;"></video>
+  <div id="scene-1-overlay" class="scene clip"
+       data-start="0" data-duration="8" data-track-index="4"
+       style="z-index:11;">
     <div class="caption" id="scene-1-cap">
       <p class="line">It&rsquo;s three fourteen in the morning.</p>
     </div>
@@ -296,9 +301,14 @@
     SCENE 4 — Reaching for phone — 0:18–0:23
     "So we tried to bring one back."
   -->
-  <div id="scene-4" class="scene clip"
-       data-start="18" data-duration="5" data-track-index="1">
-    <img src="assets/anime-4.jpg" alt="" id="scene-4-img" data-layout-allow-overflow />
+  <video src="assets/anime-4.mp4" id="scene-4-video" muted playsinline
+         class="clip"
+         data-start="18" data-duration="5" data-track-index="1"
+         data-layout-allow-overflow
+         style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:10;"></video>
+  <div id="scene-4-overlay" class="scene clip"
+       data-start="18" data-duration="5" data-track-index="4"
+       style="z-index:11;">
     <div class="caption" id="scene-4-cap">
       <p class="line">So we tried to bring one back.</p>
     </div>
@@ -322,25 +332,24 @@
   </div>
 
   <!--
-    SCENE 6 — STACKED SPLIT: webcam (top) + platform UI (bottom) — 0:30–0:42
-    Vertical 1080x1920 → top half 0–960 is YOU, bottom half 960–1920 is the platform.
-    Videos as DIRECT CHILDREN of root (not nested in timed divs).
+    SCENE 6 — SIDE-BY-SIDE SPLIT: webcam (left) + platform UI (right) — 0:30–0:42
+    Landscape 1920x1080 → left half 0–960 is YOU, right half 960–1920 is the platform.
   -->
   <video src="assets/personal.mp4" id="scene-6-personal" muted playsinline
          class="clip"
          data-start="30" data-duration="12" data-track-index="2"
-         style="position:absolute;top:0;left:0;width:100%;height:50%;object-fit:cover;z-index:10;"></video>
+         style="position:absolute;top:0;left:0;width:50%;height:100%;object-fit:cover;z-index:10;"></video>
   <video src="assets/platform-1.mp4" id="scene-6-platform" muted playsinline
          class="clip"
          data-start="30" data-duration="12" data-track-index="3"
-         style="position:absolute;top:50%;left:0;width:100%;height:50%;object-fit:cover;background:var(--vinyl);z-index:10;"></video>
+         style="position:absolute;top:0;left:50%;width:50%;height:100%;object-fit:cover;background:var(--vinyl);z-index:10;"></video>
   <div id="scene-6-overlay" class="scene clip"
        data-start="30" data-duration="12" data-track-index="4"
        style="z-index:11;">
     <div class="panel-divider"
-         style="position:absolute;left:0;right:0;top:50%;height:2px;background:linear-gradient(90deg,transparent 0%,var(--amber) 25%,var(--amber) 75%,transparent 100%);opacity:0.4;"></div>
+         style="position:absolute;top:0;bottom:0;left:50%;width:2px;background:linear-gradient(180deg,transparent 0%,var(--amber) 25%,var(--amber) 75%,transparent 100%);opacity:0.4;"></div>
     <div class="panel-tag" style="position:absolute;top:32px;left:32px;font-family:'VT323',monospace;font-size:30px;letter-spacing:0.28em;color:var(--amber);background:rgba(0,0,0,0.55);padding:8px 16px;border:1px solid rgba(255,179,71,0.4);border-radius:3px;">YOU</div>
-    <div class="panel-tag" style="position:absolute;bottom:32px;right:32px;font-family:'VT323',monospace;font-size:30px;letter-spacing:0.28em;color:var(--amber);background:rgba(0,0,0,0.55);padding:8px 16px;border:1px solid rgba(255,179,71,0.4);border-radius:3px;">ON THE LINE</div>
+    <div class="panel-tag" style="position:absolute;top:32px;right:32px;font-family:'VT323',monospace;font-size:30px;letter-spacing:0.28em;color:var(--amber);background:rgba(0,0,0,0.55);padding:8px 16px;border:1px solid rgba(255,179,71,0.4);border-radius:3px;">ON THE LINE</div>
   </div>
   <!-- Personal clip's own audio -->
   <audio id="personal-audio"
@@ -450,9 +459,8 @@
     0
   );
 
-  /* SCENE 1 (0:00 – 0:08) */
-  tl.from("#scene-1-img", { opacity: 0, duration: 0.8, ease: "power2.out" }, 0);
-  tl.fromTo("#scene-1-img", { scale: 1.0 }, { scale: 1.06, duration: 8, ease: "none" }, 0);
+  /* SCENE 1 (0:00 – 0:08) — Veo cinematic anime, opening city */
+  tl.from("#scene-1-video", { opacity: 0, duration: 0.8, ease: "power2.out" }, 0);
   tl.from("#scene-1-cap .line", { y: 30, opacity: 0, duration: 0.7, ease: "power3.out" }, 0.6);
 
   /* SCENE 2 (0:08 – 0:13) */
@@ -465,9 +473,8 @@
   tl.fromTo("#scene-3-img", { scale: 1.0 }, { scale: 1.05, duration: 5, ease: "none" }, 13);
   tl.from("#scene-3-cap .line", { y: 24, opacity: 0, duration: 0.5, ease: "power3.out" }, 13.4);
 
-  /* SCENE 4 (0:18 – 0:23) */
-  tl.from("#scene-4", { opacity: 0, duration: 0.6, ease: "power2.out" }, 18);
-  tl.fromTo("#scene-4-img", { scale: 1.0 }, { scale: 1.05, duration: 5, ease: "none" }, 18);
+  /* SCENE 4 (0:18 – 0:23) — Veo cinematic anime, reaching for phone */
+  tl.from("#scene-4-video", { opacity: 0, duration: 0.6, ease: "power2.out" }, 18);
   tl.from("#scene-4-cap .line", { y: 24, opacity: 0, duration: 0.5, ease: "power3.out" }, 18.4);
 
   /* SCENE 5 — title card (0:23 – 0:30) */
@@ -482,12 +489,12 @@
     23.5
   );
 
-  /* SCENE 6 — stacked split (0:30 – 0:42) — top slides down, bottom slides up */
-  tl.from("#scene-6-personal", { y: -120, opacity: 0, duration: 0.8, ease: "expo.out" }, 30.3);
-  tl.from("#scene-6-platform", { y: 120, opacity: 0, duration: 0.8, ease: "expo.out" }, 30.3);
-  tl.from("#scene-6-overlay .panel-divider", { scaleX: 0, opacity: 0, transformOrigin: "center", duration: 0.5, ease: "power2.out" }, 30.9);
+  /* SCENE 6 — side-by-side split (0:30 – 0:42) — left slides in from left, right slides in from right */
+  tl.from("#scene-6-personal", { x: -120, opacity: 0, duration: 0.8, ease: "expo.out" }, 30.3);
+  tl.from("#scene-6-platform", { x: 120, opacity: 0, duration: 0.8, ease: "expo.out" }, 30.3);
+  tl.from("#scene-6-overlay .panel-divider", { scaleY: 0, opacity: 0, transformOrigin: "center", duration: 0.5, ease: "power2.out" }, 30.9);
   tl.from("#scene-6-overlay .panel-tag:nth-of-type(2)", { y: -10, opacity: 0, duration: 0.4, ease: "power3.out" }, 31.2);
-  tl.from("#scene-6-overlay .panel-tag:nth-of-type(3)", { y: 10, opacity: 0, duration: 0.4, ease: "power3.out" }, 31.4);
+  tl.from("#scene-6-overlay .panel-tag:nth-of-type(3)", { y: -10, opacity: 0, duration: 0.4, ease: "power3.out" }, 31.4);
 
   /* SCENE 7 — Kai writing (0:42 – 0:50) */
   tl.from("#scene-7-video", { opacity: 0, duration: 0.6, ease: "power2.out" }, 42);
