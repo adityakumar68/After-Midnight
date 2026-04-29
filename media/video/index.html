@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>After Midnight — Demo</title>
+<title>After Midnight — Demo (Landscape)</title>
 <style>
   /* ============================================================
-     AFTER MIDNIGHT — vertical 1080x1920 cinematic demo
+     AFTER MIDNIGHT — landscape 1920x1080 cinematic demo
      ============================================================ */
   :root {
     --walnut-deep: #2A1A0F;
@@ -21,8 +21,8 @@
   html, body { margin: 0; padding: 0; background: #000; font-family: 'Inter', system-ui, sans-serif; color: var(--cream); }
 
   [data-composition-id="root"] {
-    width: 1080px;
-    height: 1920px;
+    width: 1920px;
+    height: 1080px;
     position: relative;
     overflow: hidden;
     background: var(--vinyl);
@@ -32,7 +32,7 @@
   .booth-vignette {
     position: absolute; inset: 0;
     background:
-      radial-gradient(ellipse 100% 80% at 50% 30%, var(--walnut-deep) 0%, var(--walnut-edge) 70%, #000 100%);
+      radial-gradient(ellipse 80% 90% at 50% 30%, var(--walnut-deep) 0%, var(--walnut-edge) 70%, #000 100%);
     z-index: 0;
     pointer-events: none;
   }
@@ -40,7 +40,7 @@
   /* Bulb glow that breathes across every scene */
   .bulb-glow {
     position: absolute; inset: 0;
-    background: radial-gradient(ellipse 70% 55% at 50% 35%, rgba(255, 179, 71, 0.10) 0%, transparent 55%);
+    background: radial-gradient(ellipse 60% 65% at 50% 35%, rgba(255, 179, 71, 0.10) 0%, transparent 55%);
     z-index: 1;
     mix-blend-mode: screen;
     pointer-events: none;
@@ -64,18 +64,18 @@
     pointer-events: none;
     z-index: 49;
     background-image: repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0,0,0,0.18) 2px 4px);
-    opacity: 0.25;
+    opacity: 0.22;
   }
 
-  /* Each scene clip is positioned absolutely so they layer cleanly */
+  /* Each scene clip */
   .scene {
     position: absolute; inset: 0;
     z-index: 10;
     overflow: hidden;
   }
 
-  .scene img,
-  .scene video {
+  .scene > img,
+  .scene > video {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -83,17 +83,17 @@
     object-fit: cover;
   }
 
-  /* Caption block — bottom-centered, large readable type */
+  /* Caption block — bottom-centered for landscape, generous side margins */
   .caption {
     position: absolute;
-    left: 60px; right: 60px;
-    bottom: 220px;
+    left: 120px; right: 120px;
+    bottom: 110px;
     text-align: center;
     z-index: 30;
   }
   .caption .line {
     font-family: 'DM Serif Display', Georgia, serif;
-    font-size: 64px;
+    font-size: 78px;
     font-style: italic;
     color: var(--cream);
     line-height: 1.18;
@@ -103,7 +103,7 @@
   .caption .tag {
     margin-top: 24px;
     font-family: 'VT323', 'IBM Plex Mono', monospace;
-    font-size: 32px;
+    font-size: 38px;
     letter-spacing: 0.32em;
     text-transform: uppercase;
     color: var(--amber);
@@ -112,7 +112,7 @@
 
   /* ON AIR lamp (used in title cards) */
   .on-air-lamp {
-    width: 28px; height: 28px;
+    width: 30px; height: 30px;
     border-radius: 50%;
     background: radial-gradient(circle, #ff8a7a 0%, var(--on-air) 60%, #7a1f17 100%);
     box-shadow: 0 0 14px var(--on-air), 0 0 28px rgba(229,75,60,0.6);
@@ -120,23 +120,49 @@
     vertical-align: middle;
   }
 
-  /* Picture-in-picture for personal-clip scene */
-  .pip {
-    position: absolute;
-    right: 48px; bottom: 320px;
-    width: 360px;
-    height: 640px;
-    z-index: 35;
-    border: 2px solid var(--amber);
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.7), 0 0 24px rgba(255,179,71,0.35);
+  /* SCENE 6 — Split layout for personal clip + platform UI */
+  .scene-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%; height: 100%;
     background: var(--vinyl);
+    position: relative;
+    z-index: 10;
   }
-  .pip video,
-  .pip img {
-    width: 100%; height: 100%; object-fit: cover;
+  .scene-split .panel-left,
+  .scene-split .panel-right {
+    position: relative;
+    overflow: hidden;
   }
+  .scene-split video,
+  .scene-split img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
+  .scene-split .panel-divider {
+    position: absolute;
+    top: 0; bottom: 0; left: 50%;
+    width: 2px;
+    background: linear-gradient(180deg, transparent 0%, var(--amber) 25%, var(--amber) 75%, transparent 100%);
+    opacity: 0.4;
+    z-index: 5;
+  }
+  .scene-split .panel-tag {
+    position: absolute;
+    top: 32px; left: 32px;
+    z-index: 6;
+    font-family: 'VT323', monospace;
+    font-size: 26px;
+    letter-spacing: 0.28em;
+    color: var(--amber);
+    background: rgba(0,0,0,0.55);
+    padding: 6px 14px;
+    border: 1px solid rgba(255,179,71,0.4);
+    border-radius: 3px;
+    backdrop-filter: blur(4px);
+  }
+  .scene-split .panel-right .panel-tag { left: auto; right: 32px; }
 
   /* Title cards */
   .title-card {
@@ -145,39 +171,41 @@
     align-items: center; justify-content: center;
     text-align: center;
     z-index: 20;
-    padding: 0 80px;
+    padding: 0 120px;
     box-sizing: border-box;
   }
   .title-card .pretitle {
     font-family: 'VT323', monospace;
-    font-size: 32px;
+    font-size: 36px;
     letter-spacing: 0.36em;
     color: var(--cream-60);
     text-transform: uppercase;
-    margin-bottom: 36px;
+    margin-bottom: 28px;
   }
   .title-card .hero {
     font-family: 'DM Serif Display', Georgia, serif;
-    font-size: 152px;
+    font-size: 200px;
     color: var(--cream);
     margin: 0;
     line-height: 0.95;
     text-shadow: 0 0 60px rgba(255,179,71,0.18), 0 4px 32px rgba(0,0,0,0.8);
+    white-space: nowrap;
   }
   .title-card .sub {
-    margin-top: 32px;
+    margin-top: 36px;
     font-family: 'Inter', sans-serif;
-    font-size: 30px;
+    font-size: 32px;
     font-style: italic;
     color: var(--cream-60);
+    max-width: 1000px;
   }
   .title-card .lamp-line {
-    margin-bottom: 60px;
+    margin-bottom: 48px;
     display: inline-flex; align-items: center; gap: 18px;
   }
   .title-card .lamp-line span {
     font-family: 'VT323', monospace;
-    font-size: 36px;
+    font-size: 38px;
     letter-spacing: 0.28em;
     color: var(--on-air);
     text-shadow: 0 0 12px rgba(229,75,60,0.6);
@@ -191,15 +219,16 @@
     text-align: center;
     background: radial-gradient(circle at 50% 50%, var(--walnut-deep) 0%, #000 70%);
     z-index: 22;
-    padding: 0 80px;
+    padding: 0 120px;
     box-sizing: border-box;
   }
   .closing h2 {
     font-family: 'DM Serif Display', Georgia, serif;
-    font-size: 144px;
-    margin: 0 0 60px;
+    font-size: 192px;
+    margin: 0 0 50px;
     color: var(--cream);
     line-height: 0.9;
+    white-space: nowrap;
   }
   .closing .credit-line {
     font-family: 'IBM Plex Mono', monospace;
@@ -210,9 +239,9 @@
   }
   .closing .credit-line strong { color: var(--amber); font-weight: 500; }
   .closing .url {
-    margin-top: 48px;
+    margin-top: 44px;
     font-family: 'VT323', monospace;
-    font-size: 36px;
+    font-size: 40px;
     letter-spacing: 0.16em;
     color: var(--amber);
     text-shadow: 0 0 12px rgba(255,179,71,0.4);
@@ -221,20 +250,18 @@
 </head>
 <body>
 
-<div data-composition-id="root" data-width="1080" data-height="1920" data-start="0" data-duration="90">
+<div data-composition-id="root" data-width="1920" data-height="1080" data-start="0" data-duration="90">
 
-  <!-- Persistent atmosphere layers (always visible) -->
+  <!-- Persistent atmosphere layers -->
   <div class="booth-vignette"></div>
   <div class="bulb-glow" id="bulb"></div>
 
   <!--
-    SCENE 1: City window — anime still
-    0:00–0:08 · "It's three fourteen in the morning. The city's asleep. Your thoughts aren't."
+    SCENE 1 — Anime city window — 0:00–0:08
+    "It's three fourteen in the morning."
   -->
   <div id="scene-1" class="scene clip"
-       data-start="0"
-       data-duration="8"
-       data-track-index="1">
+       data-start="0" data-duration="8" data-track-index="1">
     <img src="assets/anime-1.jpg" alt="" id="scene-1-img" />
     <div class="caption" id="scene-1-cap">
       <p class="line">It&rsquo;s three fourteen in the morning.</p>
@@ -242,13 +269,11 @@
   </div>
 
   <!--
-    SCENE 2: Vintage radio — anime still
-    0:08–0:13 · "There used to be radio shows for this."
+    SCENE 2 — Vintage radio — 0:08–0:13
+    "There used to be radio shows for this."
   -->
   <div id="scene-2" class="scene clip"
-       data-start="8"
-       data-duration="5"
-       data-track-index="1">
+       data-start="8" data-duration="5" data-track-index="1">
     <img src="assets/anime-2.jpg" alt="" id="scene-2-img" />
     <div class="caption" id="scene-2-cap">
       <p class="line">There used to be radio shows for this.</p>
@@ -256,13 +281,11 @@
   </div>
 
   <!--
-    SCENE 3: Empty studio — anime still
-    0:13–0:18 · "Most of them are gone now."
+    SCENE 3 — Empty studio — 0:13–0:18
+    "Most of them are gone now."
   -->
   <div id="scene-3" class="scene clip"
-       data-start="13"
-       data-duration="5"
-       data-track-index="1">
+       data-start="13" data-duration="5" data-track-index="1">
     <img src="assets/anime-3.jpg" alt="" id="scene-3-img" />
     <div class="caption" id="scene-3-cap">
       <p class="line">Most of them are gone now.</p>
@@ -270,13 +293,11 @@
   </div>
 
   <!--
-    SCENE 4: Reaching for phone — anime still
-    0:18–0:23 · "So we tried to bring one back."
+    SCENE 4 — Reaching for phone — 0:18–0:23
+    "So we tried to bring one back."
   -->
   <div id="scene-4" class="scene clip"
-       data-start="18"
-       data-duration="5"
-       data-track-index="1">
+       data-start="18" data-duration="5" data-track-index="1">
     <img src="assets/anime-4.jpg" alt="" id="scene-4-img" />
     <div class="caption" id="scene-4-cap">
       <p class="line">So we tried to bring one back.</p>
@@ -284,13 +305,11 @@
   </div>
 
   <!--
-    SCENE 5: Title card "After Midnight"
-    0:23–0:30 · "This is After Midnight. You call in. An AI DJ picks up..."
+    SCENE 5 — Title card — 0:23–0:30
+    "This is After Midnight. You call in. An AI DJ picks up..."
   -->
   <div id="scene-5" class="scene clip"
-       data-start="23"
-       data-duration="7"
-       data-track-index="1">
+       data-start="23" data-duration="7" data-track-index="1">
     <div class="title-card" id="title-1">
       <div class="lamp-line">
         <span class="on-air-lamp" id="title-lamp"></span>
@@ -298,44 +317,49 @@
       </div>
       <div class="pretitle">A LATE-NIGHT RADIO SHOW</div>
       <h1 class="hero" id="title-hero">After Midnight</h1>
-      <p class="sub" id="title-sub">Listening at 3 AM, since tonight.</p>
+      <p class="sub" id="title-sub">You call in. An AI DJ picks up — and listens.</p>
     </div>
   </div>
 
   <!--
-    SCENE 6: Personal clip + PiP platform UI — THE EMOTIONAL CORE
-    0:30–0:42 · user's own voice over their own face
+    SCENE 6 — SPLIT-SCREEN: webcam (left) + platform UI (right) — 0:30–0:42
+    Videos must be DIRECT CHILDREN of root (not nested in timed divs).
+    Left half + right half via inline width/left positioning.
   -->
-  <div id="scene-6" class="scene clip"
-       data-start="30"
-       data-duration="12"
-       data-track-index="1">
-    <video src="assets/personal.mp4" id="scene-6-video" muted playsinline></video>
-    <!-- Picture-in-picture: a slice of platform UI overlaid bottom-right -->
-    <div class="pip" id="scene-6-pip">
-      <video src="assets/platform-1.mp4" muted playsinline></video>
-    </div>
-    <div class="caption" style="bottom: 80px;">
-      <div class="tag" id="scene-6-tag">YOU&rsquo;RE ON THE AIR</div>
-    </div>
+  <video src="assets/personal.mp4" id="scene-6-personal" muted playsinline
+         class="clip"
+         data-start="30" data-duration="12" data-track-index="2"
+         style="position:absolute;top:0;left:0;width:50%;height:100%;object-fit:cover;z-index:10;"></video>
+  <video src="assets/platform-1.mp4" id="scene-6-platform" muted playsinline
+         class="clip"
+         data-start="30" data-duration="12" data-track-index="3"
+         style="position:absolute;top:0;left:50%;width:50%;height:100%;object-fit:cover;z-index:10;"></video>
+  <div id="scene-6-overlay" class="scene clip"
+       data-start="30" data-duration="12" data-track-index="4"
+       style="z-index:11;">
+    <div class="panel-divider"
+         style="position:absolute;top:0;bottom:0;left:50%;width:2px;background:linear-gradient(180deg,transparent 0%,var(--amber) 25%,var(--amber) 75%,transparent 100%);opacity:0.4;"></div>
+    <div class="panel-tag" style="position:absolute;top:32px;left:32px;font-family:'VT323',monospace;font-size:26px;letter-spacing:0.28em;color:var(--amber);background:rgba(0,0,0,0.55);padding:6px 14px;border:1px solid rgba(255,179,71,0.4);border-radius:3px;">YOU</div>
+    <div class="panel-tag" style="position:absolute;top:32px;right:32px;font-family:'VT323',monospace;font-size:26px;letter-spacing:0.28em;color:var(--amber);background:rgba(0,0,0,0.55);padding:6px 14px;border:1px solid rgba(255,179,71,0.4);border-radius:3px;">ON THE LINE</div>
   </div>
-  <!-- Personal clip's own audio (from the recording) -->
+  <!-- Personal clip's own audio -->
   <audio id="personal-audio"
          src="assets/personal.mp4"
-         data-start="30"
-         data-duration="12"
+         data-start="30" data-duration="12"
          data-track-index="6"
          data-volume="1"></audio>
 
   <!--
-    SCENE 7: Platform — Kai writing card
-    0:42–0:50 · "And then while you're still on the line, he writes you a song."
+    SCENE 7 — Platform: Kai-is-writing card — 0:42–0:50
+    Video as top-level sibling; caption div overlays it.
   -->
-  <div id="scene-7" class="scene clip"
-       data-start="42"
-       data-duration="8"
-       data-track-index="1">
-    <video src="assets/platform-2.mp4" id="scene-7-video" muted playsinline></video>
+  <video src="assets/platform-2.mp4" id="scene-7-video" muted playsinline
+         class="clip"
+         data-start="42" data-duration="8" data-track-index="2"
+         style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:10;"></video>
+  <div id="scene-7-overlay" class="scene clip"
+       data-start="42" data-duration="8" data-track-index="4"
+       style="z-index:11;">
     <div class="caption">
       <p class="line" id="scene-7-line">A song. Written for you. While you talk.</p>
       <div class="tag" id="scene-7-tag">LIVE GENERATION · 60 SECONDS · WITH VOCALS</div>
@@ -343,29 +367,30 @@
   </div>
 
   <!--
-    SCENE 8: Platform — Vinyl + song playing
-    0:50–1:10 · "Sixty seconds. With vocals. With lyrics. About your night."
-                "Nobody has heard it before. Nobody will hear it again."
+    SCENE 8 — Vinyl + song playing — 0:50–1:10
   -->
-  <div id="scene-8" class="scene clip"
-       data-start="50"
-       data-duration="20"
-       data-track-index="1">
-    <video src="assets/platform-3.mp4" id="scene-8-video" muted playsinline></video>
+  <video src="assets/platform-3.mp4" id="scene-8-video" muted playsinline
+         class="clip"
+         data-start="50" data-duration="20" data-track-index="2"
+         style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:10;"></video>
+  <div id="scene-8-overlay" class="scene clip"
+       data-start="50" data-duration="20" data-track-index="4"
+       style="z-index:11;">
     <div class="caption">
-      <div class="tag" id="scene-8-tag">+ WRITTEN FOR YOU</div>
+      <div class="tag" id="scene-8-tag">+ WRITTEN FOR YOU TONIGHT</div>
     </div>
   </div>
 
   <!--
-    SCENE 9: Platform — DJ Mode flip
-    1:10–1:22 · "Or you flip the booth. Take the chair. Three callers..."
+    SCENE 9 — DJ Mode flip — 1:10–1:22
   -->
-  <div id="scene-9" class="scene clip"
-       data-start="70"
-       data-duration="12"
-       data-track-index="1">
-    <video src="assets/platform-4.mp4" id="scene-9-video" muted playsinline></video>
+  <video src="assets/platform-4.mp4" id="scene-9-video" muted playsinline
+         class="clip"
+         data-start="70" data-duration="12" data-track-index="2"
+         style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:10;"></video>
+  <div id="scene-9-overlay" class="scene clip"
+       data-start="70" data-duration="12" data-track-index="4"
+       style="z-index:11;">
     <div class="caption">
       <p class="line" id="scene-9-line">Or take the chair.</p>
       <div class="tag" id="scene-9-tag">THREE CALLERS · ONE QUIET HOUR</div>
@@ -373,13 +398,11 @@
   </div>
 
   <!--
-    SCENE 10: Wide closing anime + "Built in 24 hours..." line
-    1:22–1:30 · the rest of the VO + closing music
+    SCENE 10 — Closing wide anime — 1:22–1:26
+    "The voices are real. The songs are real."
   -->
   <div id="scene-10" class="scene clip"
-       data-start="82"
-       data-duration="4"
-       data-track-index="1">
+       data-start="82" data-duration="4" data-track-index="1">
     <img src="assets/anime-5.jpg" alt="" id="scene-10-img" />
     <div class="caption">
       <p class="line" id="scene-10-line">The voices are real. The songs are real.</p>
@@ -387,17 +410,14 @@
   </div>
 
   <!--
-    SCENE 11: Closing title card with credits
-    1:26–1:30 · final beat
+    SCENE 11 — Closing title card — 1:26–1:30
   -->
   <div id="scene-11" class="scene clip"
-       data-start="86"
-       data-duration="4"
-       data-track-index="1">
+       data-start="86" data-duration="4" data-track-index="1">
     <div class="closing" id="closing-card">
       <h2 id="closing-hero">After Midnight</h2>
       <div class="credit-line">
-        Built for <strong>#ElevenHacks</strong> &nbsp;·&nbsp; <strong>Hack #6</strong><br />
+        Built for <strong>#ElevenHacks</strong> &nbsp;·&nbsp; <strong>Hack #6</strong> &nbsp;·&nbsp;
         <strong>@zeddotdev</strong> &nbsp;×&nbsp; <strong>@elevenlabsio</strong>
       </div>
       <div class="url">after-midnight-nine.vercel.app</div>
@@ -411,138 +431,91 @@
   <!-- ============================================================
        AUDIO TRACKS — VO + ambient music bed
        ============================================================ -->
-
-  <!-- VO part 1: 0:00 – ~0:27 (intro through "doesn't rush you") -->
-  <audio id="vo-1"
-         src="vo-part1.mp3"
-         data-start="0"
-         data-duration="27"
-         data-track-index="5"
-         data-volume="1"></audio>
-
-  <!-- VO part 2: 0:42 – ~1:24 (post-personal-clip narration) -->
-  <audio id="vo-2"
-         src="vo-part2.mp3"
-         data-start="42"
-         data-duration="42"
-         data-track-index="5"
-         data-volume="1"></audio>
-
-  <!-- Ambient music bed across the whole video at low volume -->
-  <audio id="music-bed"
-         src="music-bed-long.mp3"
-         data-start="0"
-         data-duration="90"
-         data-track-index="7"
-         data-volume="0.18"></audio>
+  <audio id="vo-1"   src="vo-part1.mp3"        data-start="0"  data-duration="27" data-track-index="5" data-volume="1"></audio>
+  <audio id="vo-2"   src="vo-part2.mp3"        data-start="42" data-duration="42" data-track-index="5" data-volume="1"></audio>
+  <audio id="bed"    src="music-bed-long.mp3"  data-start="0"  data-duration="90" data-track-index="7" data-volume="0.18"></audio>
 
 </div>
 
-<!-- GSAP timeline driving the cross-scene animations -->
+<!-- GSAP timeline driving cross-scene animations -->
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
 <script>
   window.__timelines = window.__timelines || {};
   const tl = gsap.timeline({ paused: true });
 
-  /* ====================================================
-     PERSISTENT AMBIENT — bulb glow breathes the whole 90s
-     ==================================================== */
+  /* Persistent ambient — bulb breathes for the whole 90s */
   tl.fromTo("#bulb",
     { opacity: 0.85 },
     { opacity: 1.05, duration: 4, ease: "sine.inOut", yoyo: true, repeat: 21 },
     0
   );
 
-  /* ====================================================
-     SCENE 1 (0:00 – 0:08) — City window
-     ==================================================== */
+  /* SCENE 1 (0:00 – 0:08) */
   tl.from("#scene-1-img", { opacity: 0, duration: 0.8, ease: "power2.out" }, 0);
   tl.fromTo("#scene-1-img", { scale: 1.0 }, { scale: 1.06, duration: 8, ease: "none" }, 0);
   tl.from("#scene-1-cap .line", { y: 30, opacity: 0, duration: 0.7, ease: "power3.out" }, 0.6);
 
-  /* ====================================================
-     SCENE 2 (0:08 – 0:13) — Vintage radio
-     ==================================================== */
+  /* SCENE 2 (0:08 – 0:13) */
   tl.from("#scene-2", { opacity: 0, duration: 0.6, ease: "power2.out" }, 8);
   tl.fromTo("#scene-2-img", { scale: 1.0 }, { scale: 1.05, duration: 5, ease: "none" }, 8);
   tl.from("#scene-2-cap .line", { y: 24, opacity: 0, duration: 0.5, ease: "power3.out" }, 8.4);
 
-  /* ====================================================
-     SCENE 3 (0:13 – 0:18) — Empty studio
-     ==================================================== */
+  /* SCENE 3 (0:13 – 0:18) */
   tl.from("#scene-3", { opacity: 0, duration: 0.6, ease: "power2.out" }, 13);
   tl.fromTo("#scene-3-img", { scale: 1.0 }, { scale: 1.05, duration: 5, ease: "none" }, 13);
   tl.from("#scene-3-cap .line", { y: 24, opacity: 0, duration: 0.5, ease: "power3.out" }, 13.4);
 
-  /* ====================================================
-     SCENE 4 (0:18 – 0:23) — Reaching for phone
-     ==================================================== */
+  /* SCENE 4 (0:18 – 0:23) */
   tl.from("#scene-4", { opacity: 0, duration: 0.6, ease: "power2.out" }, 18);
   tl.fromTo("#scene-4-img", { scale: 1.0 }, { scale: 1.05, duration: 5, ease: "none" }, 18);
   tl.from("#scene-4-cap .line", { y: 24, opacity: 0, duration: 0.5, ease: "power3.out" }, 18.4);
 
-  /* ====================================================
-     SCENE 5 (0:23 – 0:30) — Title card "After Midnight"
-     ==================================================== */
+  /* SCENE 5 — title card (0:23 – 0:30) */
   tl.from("#scene-5", { opacity: 0, duration: 0.6, ease: "power2.out" }, 23);
   tl.from("#title-1 .lamp-line", { y: -30, opacity: 0, duration: 0.6, ease: "power3.out" }, 23.3);
   tl.from("#title-1 .pretitle", { y: 20, opacity: 0, duration: 0.5, ease: "power3.out" }, 23.6);
   tl.from("#title-hero", { y: 60, opacity: 0, scale: 0.96, duration: 1.0, ease: "expo.out" }, 23.9);
   tl.from("#title-sub", { y: 20, opacity: 0, duration: 0.6, ease: "power3.out" }, 24.6);
-
-  // Title lamp pulses through the whole title beat
   tl.fromTo("#title-lamp",
     { boxShadow: "0 0 14px #E54B3C, 0 0 28px rgba(229,75,60,0.6)" },
     { boxShadow: "0 0 22px #E54B3C, 0 0 50px rgba(229,75,60,0.9)", duration: 1.0, yoyo: true, repeat: 6, ease: "sine.inOut" },
     23.5
   );
 
-  /* ====================================================
-     SCENE 6 (0:30 – 0:42) — Personal clip + PiP — heart of the video
-     ==================================================== */
-  tl.from("#scene-6", { opacity: 0, duration: 0.6, ease: "power2.out" }, 30);
-  tl.from("#scene-6-pip", { x: 80, y: 40, opacity: 0, scale: 0.92, duration: 0.8, ease: "expo.out" }, 30.6);
-  tl.from("#scene-6-tag", { y: 20, opacity: 0, duration: 0.5, ease: "power3.out" }, 31.0);
+  /* SCENE 6 — split screen (0:30 – 0:42) */
+  tl.from("#scene-6-personal", { x: -120, opacity: 0, duration: 0.8, ease: "expo.out" }, 30.3);
+  tl.from("#scene-6-platform", { x: 120, opacity: 0, duration: 0.8, ease: "expo.out" }, 30.3);
+  tl.from("#scene-6-overlay .panel-divider", { scaleY: 0, opacity: 0, transformOrigin: "center", duration: 0.5, ease: "power2.out" }, 30.9);
+  tl.from("#scene-6-overlay .panel-tag:nth-of-type(2)", { y: -10, opacity: 0, duration: 0.4, ease: "power3.out" }, 31.2);
+  tl.from("#scene-6-overlay .panel-tag:nth-of-type(3)", { y: -10, opacity: 0, duration: 0.4, ease: "power3.out" }, 31.4);
 
-  /* ====================================================
-     SCENE 7 (0:42 – 0:50) — "Kai is writing" platform shot
-     ==================================================== */
-  tl.from("#scene-7", { opacity: 0, duration: 0.6, ease: "power2.out" }, 42);
+  /* SCENE 7 — Kai writing (0:42 – 0:50) */
+  tl.from("#scene-7-video", { opacity: 0, duration: 0.6, ease: "power2.out" }, 42);
   tl.from("#scene-7-line", { y: 24, opacity: 0, duration: 0.6, ease: "power3.out" }, 42.4);
   tl.from("#scene-7-tag", { y: 18, opacity: 0, duration: 0.5, ease: "power3.out" }, 43.0);
 
-  /* ====================================================
-     SCENE 8 (0:50 – 1:10) — Vinyl spins + song plays — let it breathe
-     ==================================================== */
-  tl.from("#scene-8", { opacity: 0, duration: 0.6, ease: "power2.out" }, 50);
+  /* SCENE 8 — vinyl + song (0:50 – 1:10) */
+  tl.from("#scene-8-video", { opacity: 0, duration: 0.6, ease: "power2.out" }, 50);
   tl.from("#scene-8-tag", { y: 18, opacity: 0, duration: 0.6, ease: "power3.out" }, 50.6);
-  // Tag fades briefly then returns
   tl.to("#scene-8-tag", { opacity: 0.3, duration: 1.5, ease: "sine.inOut" }, 53);
   tl.to("#scene-8-tag", { opacity: 1, duration: 1.0, ease: "sine.inOut" }, 65);
 
-  /* ====================================================
-     SCENE 9 (1:10 – 1:22) — DJ Mode flip
-     ==================================================== */
-  tl.from("#scene-9", { opacity: 0, duration: 0.6, ease: "power2.out" }, 70);
+  /* SCENE 9 — DJ mode flip (1:10 – 1:22) */
+  tl.from("#scene-9-video", { opacity: 0, duration: 0.6, ease: "power2.out" }, 70);
   tl.from("#scene-9-line", { y: 24, opacity: 0, duration: 0.6, ease: "power3.out" }, 70.4);
   tl.from("#scene-9-tag", { y: 18, opacity: 0, duration: 0.5, ease: "power3.out" }, 71.0);
 
-  /* ====================================================
-     SCENE 10 (1:22 – 1:26) — Closing wide anime
-     ==================================================== */
+  /* SCENE 10 — closing wide anime (1:22 – 1:26) */
   tl.from("#scene-10", { opacity: 0, duration: 0.6, ease: "power2.out" }, 82);
   tl.fromTo("#scene-10-img", { scale: 1.0 }, { scale: 1.04, duration: 4, ease: "none" }, 82);
   tl.from("#scene-10-line", { y: 24, opacity: 0, duration: 0.5, ease: "power3.out" }, 82.4);
 
-  /* ====================================================
-     SCENE 11 (1:26 – 1:30) — Closing title card
-     ==================================================== */
+  /* SCENE 11 — closing card (1:26 – 1:30) */
   tl.from("#scene-11", { opacity: 0, duration: 0.6, ease: "power2.out" }, 86);
   tl.from("#closing-hero", { y: 60, opacity: 0, scale: 0.96, duration: 0.9, ease: "expo.out" }, 86.3);
   tl.from("#closing-card .credit-line", { y: 20, opacity: 0, duration: 0.6, ease: "power3.out" }, 87.0);
   tl.from("#closing-card .url", { y: 16, opacity: 0, duration: 0.5, ease: "power3.out" }, 87.4);
-
-  // Final fade to black on the LAST scene only (allowed by skill rules)
+  // Final fade only on the last scene (allowed by skill rules)
   tl.to("#closing-card", { opacity: 0, duration: 1.0, ease: "power2.in" }, 89);
 
   window.__timelines["root"] = tl;

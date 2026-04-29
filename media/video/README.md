@@ -1,6 +1,6 @@
-# After Midnight — demo video
+# After Midnight — demo video (LANDSCAPE 1920×1080)
 
-90-second cinematic vertical (1080×1920) HyperFrames composition.
+90-second cinematic landscape HyperFrames composition. Designed for laptop-recorded footage of the desktop platform.
 
 ## Files in this folder
 
@@ -17,68 +17,76 @@
 | `assets/anime-3.jpg` | Empty studio | **YOU — Claude Design** |
 | `assets/anime-4.jpg` | Reaching for phone | **YOU — Claude Design** |
 | `assets/anime-5.jpg` | Wide closing cityscape | **YOU — Claude Design** |
-| `assets/personal.mp4` | Your 10-12s selfie clip | **YOU — phone** |
-| `assets/platform-1.mp4` | Landing → Allow Mic | **YOU — phone screen-rec** |
-| `assets/platform-2.mp4` | Kai-is-writing card | **YOU — phone screen-rec** |
-| `assets/platform-3.mp4` | Vinyl + song playing | **YOU — phone screen-rec** |
-| `assets/platform-4.mp4` | DJ mode flip | **YOU — phone screen-rec** |
+| `assets/personal.mp4` | Your 10-12s laptop webcam selfie | **YOU — laptop webcam** |
+| `assets/platform-1.mp4` | Landing → Allow Mic | **YOU — laptop screen-rec** |
+| `assets/platform-2.mp4` | Kai-is-writing card | **YOU — laptop screen-rec** |
+| `assets/platform-3.mp4` | Vinyl + song playing | **YOU — laptop screen-rec** |
+| `assets/platform-4.mp4` | DJ mode flip | **YOU — laptop screen-rec** |
 
 All asset files in `assets/` start as zero-byte placeholders so the project compiles.
 Drop your real files in with the same names — that's it.
 
-## Image prompts for Claude Design
+## Image prompts for Claude Design — 1920×1080 LANDSCAPE
 
-All images: **1080×1920 vertical**. Style prefix on every prompt:
+All images: **1920×1080 horizontal**. Style prefix on every prompt:
 
-> Cinematic anime in the style of Makoto Shinkai (Your Name, 5 Centimeters per Second). Soft cel-shaded 2D animation. Warm walnut, amber, and cream palette with deep blacks. Slight film grain. Late-night 3 AM mood. No text in image.
+> Cinematic anime in the style of Makoto Shinkai (Your Name, 5 Centimeters per Second). Soft cel-shaded 2D animation. Warm walnut, amber, and cream palette with deep blacks. Slight film grain. Late-night 3 AM mood. No text in image. Wide cinematic horizontal composition.
 
 | File | Prompt body (after the prefix) |
 |---|---|
-| `anime-1.jpg` | A single warmly-lit apartment window, third floor in a vast night cityscape of dark high-rises. Soft rain glittering through amber streetlights. Vertical composition, the lit window framed by silhouetted buildings. Lonely, beautiful, hopeful. |
-| `anime-2.jpg` | Close-up of a vintage 1980s wood-paneled AM radio on a wooden bedside table. The dial glows soft amber. Reflection on polished walnut. A glass of water and an open paperback nearby. The room is dark except for the amber dial light. |
-| `anime-3.jpg` | An empty 1980s radio studio at 4:30 AM. A vintage Shure SM7B microphone hanging from its boom arm. The ON AIR lamp is dark. Walnut mixing console. Empty chair. A coffee cup. Vinyl records stacked. Quiet, after-show melancholy. |
-| `anime-4.jpg` | A young person seen from behind, sitting on the edge of a bed in a dim room at 3 AM. Their hand reaches for an old rotary phone on the nightstand. Their face is not shown — only silhouette and one ear. Soft amber light from a lamp. Heavy emotional weight in the posture. |
-| `anime-5.jpg` | Wide cinematic city view at 4:00 AM, looking down a quiet rain-slicked street. In one apartment building, a single window glows amber — recognizable as the same window from the opening shot. The city is sleeping. The radio is still on. Hopeful melancholy. |
+| `anime-1.jpg` | A vast wide-angle night cityscape of dark high-rises, a single warmly-lit apartment window glowing amber on the third floor of a building near the center-left third of the frame. Soft rain glittering through amber streetlights. Lonely, beautiful, hopeful. |
+| `anime-2.jpg` | Wide cinematic close-up of a vintage 1980s wood-paneled AM radio on a wooden bedside table. The dial glows soft amber. Reflection on polished walnut. A glass of water and an open paperback nearby. Soft amber glow falling off into the dark room on either side. Composed for horizontal frame. |
+| `anime-3.jpg` | Wide horizontal shot of an empty 1980s radio studio at 4:30 AM. A vintage Shure SM7B microphone hanging from its boom arm centered in frame. The ON AIR lamp is dark. Walnut mixing console stretches across the bottom of the frame. Empty chair, coffee cup, vinyl records stacked on the right. Quiet after-show melancholy. |
+| `anime-4.jpg` | Wide cinematic shot of a young person seen from behind, sitting on the edge of a bed in a dim room at 3 AM. Their hand reaches across the frame for an old rotary phone on the nightstand. Their face is not shown — only silhouette and one ear in profile. Soft amber light from a lamp on the right side of the frame. Heavy emotional weight. |
+| `anime-5.jpg` | Wide cinematic city overlook at 4:00 AM, looking down a quiet rain-slicked street, vanishing point in the center distance. In one apartment building visible in the middle distance, a single window glows amber — recognizable as the same window from the opening shot. The city is sleeping. Hopeful melancholy. |
 
-## Personal clip directions
+## Personal clip directions — laptop webcam
 
-- 1080×1920 vertical (selfie orientation)
+- **1920×1080 horizontal** (laptop's native webcam orientation)
 - 10-12 seconds
-- Hold platform phone in hand, hit TALK, speak one vulnerable line
-- Lighting: warm side lamp; avoid overhead fluorescent
-- Wear something dark
-- Three takes minimum; pick the one where your voice catches naturally
+- Sit centered in frame, soft warm lamp lighting from the side
+- Look slightly off-camera (not directly into the lens — it breaks the intimacy)
+- Speak ONE vulnerable line slowly, with feeling
 
-Suggested lines (pick whichever is true):
+Use **QuickTime → New Movie Recording**:
+1. Choose the **FaceTime HD camera**
+2. Click the dropdown next to record button → **Quality: High**
+3. Click record, count 1-2 seconds of silence, then deliver your line, then 1-2 seconds of silence
+4. Stop, save as `media/video/assets/personal.mp4`
+
+Suggested lines (pick whichever is true to you):
 - *"My mom died two years ago. I keep dreaming about her making chai."*
 - *"I haven't talked to my best friend in eight months. I don't even know why."*
 - *"I quit my job a month ago and I still haven't told my dad."*
+- Or any honest 8-10 word emotional fragment from your actual life
 
-## Platform screen-recording shot list
+You'll be on the LEFT half of the frame in the final video; the right half shows the platform in parallel. So look slightly to your right (toward the imaginary platform) when speaking.
 
-iOS: Settings → Control Center → Add Screen Recording. Long-press the recording icon → toggle Microphone OFF (we add audio in post).
+## Platform screen recording — laptop
 
-Open https://after-midnight-nine.vercel.app on your phone in fresh Chrome, then:
+Use **QuickTime → New Screen Recording** with:
+- Click the dropdown arrow → enable **Microphone OFF** (audio gets added later)
+- Click record → drag-select a region matching your browser viewport (1280×800 ideal, or full browser)
+- Open https://after-midnight-nine.vercel.app in **Chrome in fullscreen / kiosk mode** (Cmd+Ctrl+F)
 
 | File | Length | Capture instructions |
 |---|---|---|
-| `platform-1.mp4` | 8s | Open landing → tap **Be a Caller** → tap **Allow Mic** → screen shows the booth ringing |
-| `platform-2.mp4` | 8s | Continue the call after your personal clip → screen shows **"✎ KAI IS WRITING — [vibe]"** card pulsing |
-| `platform-3.mp4` | 20s | Vinyl spinning, song title appearing, song with vocals playing through. The hero shot — let it ride. |
-| `platform-4.mp4` | 12s | Quick cut to landing → tap **Be the DJ** → call comes in → answer → tap a song from stacks → vinyl spins |
+| `platform-1.mp4` | 8s | Open landing → click **Be a Caller** → click **Allow Mic** → screen shows the booth dialing/ringing |
+| `platform-2.mp4` | 8s | Continue the call after your personal clip → screen shows **"✎ KAI IS WRITING — [vibe]"** card pulsing in the library panel |
+| `platform-3.mp4` | 20s | Vinyl spinning, song title appearing, song with vocals playing through. Hero shot — let it ride. |
+| `platform-4.mp4` | 12s | Cut to landing → click **Be the DJ** → call comes in → answer → tap a song from the stacks → vinyl spins |
 
-## To assemble
+For Plat 2 + 3 you'll need to **actually have a real conversation with Kai** to trigger the `play_song` tool. Plan a quiet moment — you have to wait the 30-50s for music gen during recording, then trim.
 
-Once all assets are in `assets/`:
+## To assemble (after assets are in `assets/`)
 
 ```bash
 cd /Users/aditya/elevenlabs/media/video
-npx hyperframes lint
-npx hyperframes validate
-npx hyperframes inspect
-npx hyperframes render --out after-midnight-demo.mp4
+hyperframes lint
+hyperframes inspect       # checks layout / overflow at hero frames
+hyperframes render --out after-midnight-demo.mp4
 ```
 
-The render command will produce `after-midnight-demo.mp4` (1080×1920, 90 seconds, captioned).
+Output: `after-midnight-demo.mp4` (1920×1080, 90 seconds).
 
-For Devpost (horizontal), open the rendered file in CapCut → resize 1920×1080 → letterbox the original → re-export.
+**Already lint-clean (0 errors).** The 4 remaining warnings are about file size — non-blocking for a 90-second hackathon demo.
