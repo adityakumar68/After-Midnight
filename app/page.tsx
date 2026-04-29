@@ -45,7 +45,7 @@ export default function Landing() {
             color: "var(--cream)", opacity: 0.85, lineHeight: 1.45, maxWidth: 560,
             animation: "fade-up 1.2s 1.4s ease-out both",
           }}>
-            Three callers. One quiet hour. You&apos;re the only one still up.
+            Some nights you host the show. Some nights you call in. Either way, the booth&apos;s still warm at 3 AM.
           </p>
 
           <div style={{
