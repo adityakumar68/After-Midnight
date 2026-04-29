@@ -24,7 +24,7 @@ function get(key: SfxKey, loop = false, volume = 0.6): HTMLAudioElement {
 
 export const Sfx = {
   ring:    () => { const a = get("ring", true, 0.5);      a.currentTime = 0; void a.play().catch(() => {}); return () => a.pause(); },
-  onair:   () => { const a = get("onair", false, 0.6);    a.currentTime = 0; void a.play().catch(() => {}); },
+  onair:   () => { const a = get("onair", false, 0.30);   a.currentTime = 0; void a.play().catch(() => {}); },
   static:  () => { const a = get("static", false, 0.4);   a.currentTime = 0; void a.play().catch(() => {}); },
   roomtone:() => { const a = get("roomtone", true, 0.25); void a.play().catch(() => {}); return () => a.pause(); },
   stopAll: () => { for (const a of cache.values()) { a.pause(); a.currentTime = 0; } },

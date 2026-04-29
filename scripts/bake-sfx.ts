@@ -10,7 +10,7 @@ if (!KEY) { console.error("Set ELEVENLABS_API_KEY"); process.exit(1); }
 const TARGETS: Record<string, { prompt: string; duration: number }> = {
   ring:        { prompt: "vintage rotary phone ringing, single ring then pause, 3 seconds",   duration: 3 },
   static:      { prompt: "AM radio static crackle, brief warm hiss, 2 seconds",                duration: 2 },
-  onair:       { prompt: "broadcast on-air buzzer, short low warm beep, half second",          duration: 1 },
+  onair:       { prompt: "very soft warm analog phone-connecting click, gentle quiet vintage telephone latch, no buzzer, half second, calming and unobtrusive", duration: 1 },
   "room-tone": { prompt: "quiet 1980s radio studio room tone, faint hum, 8 seconds",           duration: 8 },
 };
 
