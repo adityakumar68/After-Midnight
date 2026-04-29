@@ -31,7 +31,5 @@ pnpm-debug.log*
 .idea/
 *.swp
 
-# Audio bake artifacts (regenerate via scripts/bake-songs.ts)
-# .gitkeep files in public/audio/* are tracked; MP3s are not.
-public/audio/songs/*.mp3
-public/audio/sfx/*.mp3
+# Audio assets are committed so Vercel deploys them.
+# Re-bake with `npm run bake:songs` and `npm run bake:sfx` to regenerate.
