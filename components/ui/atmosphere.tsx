@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import React, { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 
 /* ---------- Booth backdrop ---------- */
 export function Booth({ dim = false, children }: { dim?: boolean; children: ReactNode }) {
@@ -16,18 +16,19 @@ export function Booth({ dim = false, children }: { dim?: boolean; children: Reac
   );
 }
 
-/* ---------- Dust motes ---------- */
+/* ---------- Dust motes (client-only to avoid hydration mismatch) ---------- */
 function Motes({ dim = false }: { dim?: boolean }) {
-  const motes = useMemo(() => {
+  const [motes, setMotes] = useState<Array<{ left: number; bottom: number; size: number; duration: number; delay: number; drift: number }>>([]);
+  useEffect(() => {
     const n = 7;
-    return Array.from({ length: n }, () => ({
+    setMotes(Array.from({ length: n }, () => ({
       left: 8 + Math.random() * 84,
       bottom: -10 - Math.random() * 30,
       size: 3 + Math.random() * 5,
       duration: 22 + Math.random() * 18,
       delay: -Math.random() * 30,
       drift: (Math.random() - 0.5) * 80,
-    }));
+    })));
   }, []);
 
   return (
