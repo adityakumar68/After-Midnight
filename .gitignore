@@ -46,3 +46,6 @@ images-midnight/
 # User's local content drop folder (sources for AI-generated assets)
 midnight-content/
 media/video/work-*/
+
+# Raw nano-banana logo source dir (cleaned versions live in public/logo/)
+logo-content-nano-banana/

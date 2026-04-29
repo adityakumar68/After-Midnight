@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { OnAirLamp } from "@/components/ui/atmosphere";
+import Image from "next/image";
 
 export default function AppHeader() {
   return (
     <header className="app-header" aria-label="After Midnight — A Radio Show">
       <Link href="/" className="app-header-link">
-        <OnAirLamp state="solid" size={14} />
+        <Image src="/logo/icon-192.png" alt="" width={28} height={28} priority style={{ borderRadius: 6 }} />
         <span className="app-header-wordmark">After Midnight</span>
       </Link>
       <div style={{ display: "flex", alignItems: "center", gap: 22 }}>

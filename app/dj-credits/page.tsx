@@ -208,6 +208,9 @@ export default function CreditsPage() {
             <button className="btn-amber-outline" onClick={handleShare}>
               Share the Show
             </button>
+            <button className="btn-walnut" onClick={() => { game.reset(); router.push("/"); }}>
+              Back to Home
+            </button>
           </div>
 
           <div className="font-mono" style={{

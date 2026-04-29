@@ -45,6 +45,14 @@ export default function CallerCredits() {
           <a href={`https://twitter.com/intent/tweet?text=${tweet}`} target="_blank" rel="noopener noreferrer" className="btn-amber-outline">
             Share This Night
           </a>
+          <Link href="/" onClick={() => game.reset()} className="btn-walnut">
+            Back to Home
+          </Link>
+        </div>
+        <div className="mt-6">
+          <Link href="/library" className="btn-amber-outline">
+            Browse Library
+          </Link>
         </div>
 
         <p className="mt-16 text-[11px] text-[--cream-30]" style={{ fontFamily: "var(--font-mono)", letterSpacing: "0.18em" }}>

@@ -8,6 +8,7 @@ import { canonicalizeVibe, expandPrompt } from "@/lib/library/vibes";
 import { startDjSession, type AgentSession } from "@/lib/elevenlabs/agent";
 import { Sfx } from "@/lib/audio/sfx";
 import { unlockAudio } from "@/lib/audio/unlock";
+import { audioBus } from "@/lib/audio/audioBus";
 import { DJS, type Dj } from "@/lib/game/djs";
 import CallerDesign from "@/components/game/CallerDesign";
 import CallerMobile from "@/components/game/CallerMobile";
@@ -110,13 +111,6 @@ export default function CallerClient() {
     }
 
     if (!song) return;
-    // Stop any previous song before playing the next so they don't overlap
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.onended = null;
-      audioRef.current.src = "";
-      audioRef.current = null;
-    }
     // Hang up the DJ immediately so the agent doesn't talk over the song
     if (sessionRef.current) {
       sessionRef.current.end().catch(() => {});
@@ -125,16 +119,16 @@ export default function CallerClient() {
     setNowPlaying(song);
     setFlashId(song.id);
     useCallerGame.getState().songReady(song.id);
-    const a = new Audio(song.src);
-    audioRef.current = a;
-    a.volume = 0.85;
-    void a.play().catch(() => {});
-    a.onended = () => {
-      useCallerGame.getState().songEnded();
-      setTimeout(() => useCallerGame.getState().hangUp({
-        vibe, songId: song!.id, songTitle: song!.title, origin: song!.origin,
-      }), 4000);
-    };
+    // Route playback through the global audio bus — guarantees navigation stops it.
+    audioBus.play(song.id, song.src, {
+      volume: 0.85,
+      onended: () => {
+        useCallerGame.getState().songEnded();
+        setTimeout(() => useCallerGame.getState().hangUp({
+          vibe, songId: song!.id, songTitle: song!.title, origin: song!.origin,
+        }), 4000);
+      },
+    });
   }, []);
 
   // Event-driven orchestration (NOT useEffect): triggered when user picks a DJ.
@@ -178,9 +172,18 @@ export default function CallerClient() {
     if (game.callerState !== "hung_up") return;
     sessionRef.current?.end().catch(() => {});
     sessionRef.current = null;
-    audioRef.current?.pause();
+    audioBus.stopAll();
     setTimeout(() => router.push("/caller-credits"), 1200);
   }, [game.callerState, router]);
+
+  // Belt-and-braces: when this component unmounts, stop everything.
+  useEffect(() => {
+    return () => {
+      sessionRef.current?.end().catch(() => {});
+      sessionRef.current = null;
+      audioBus.stopAll();
+    };
+  }, []);
 
   const onPtDown = useCallback(() => {
     setRecording(true);

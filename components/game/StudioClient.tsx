@@ -11,6 +11,7 @@ import { createRecorder, type Recorder } from "@/lib/audio/recorder";
 import { attachMeter, type MeterTap } from "@/lib/audio/analyser";
 import { Sfx } from "@/lib/audio/sfx";
 import { unlockAudio } from "@/lib/audio/unlock";
+import { audioBus } from "@/lib/audio/audioBus";
 import StudioDesign, { mapState } from "@/components/game/StudioDesign";
 import StudioMobile from "@/components/game/StudioMobile";
 import { useLibrary } from "@/lib/library/songLibrary";
@@ -156,6 +157,15 @@ export default function StudioClient() {
       .catch((e) => console.error("voice change failed:", (e as Error).message));
   }, [recording, djVoiceOn]);
 
+  // Stop audio + agent on unmount
+  useEffect(() => {
+    return () => {
+      sessionRef.current?.end().catch(() => {});
+      sessionRef.current = null;
+      audioBus.stopAll();
+    };
+  }, []);
+
   // VU meter tick
   useEffect(() => {
     let raf = 0;
@@ -177,12 +187,10 @@ export default function StudioClient() {
     sessionRef.current?.end().catch(() => {});
     sessionRef.current = null;
     game.pickSong(s.id);
-    const a = new Audio(s.src);
-    a.volume = 0.85;
-    void a.play().catch(() => {});
+    audioBus.play(s.id, s.src, { volume: 0.85 });
     const songMs = Math.min(15000, s.durationSec * 1000);
     setTimeout(() => {
-      a.pause();
+      audioBus.stopAll();
       game.songEnded();
       const reaction = reactionFor(currentCaller, s.vibe);
       console.log("[caller reaction]", reaction.line);
