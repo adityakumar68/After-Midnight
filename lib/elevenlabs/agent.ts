@@ -15,12 +15,8 @@ export interface AgentEvents {
   onAgentResponse?: (text: string) => void;
 }
 
-interface ToolCall {
-  name: string;
-  parameters: Record<string, unknown>;
-}
-
-export type ToolHandler = (call: ToolCall) => Promise<string> | string;
+/** ElevenLabs Conv AI client tool callback: receives the parameters object directly. */
+export type ToolHandler = (parameters: Record<string, unknown>) => Promise<string> | string;
 
 export interface SessionOverrides {
   systemPrompt: string;
@@ -91,9 +87,10 @@ export async function startDjSession(opts: {
     },
     events: opts.events,
     clientTools: {
-      play_song: async (call) => {
-        const vibe = String(call.parameters.vibe ?? "").trim();
-        const reason = String(call.parameters.reason ?? "");
+      play_song: async (params) => {
+        const vibe = String(params?.vibe ?? "").trim();
+        const reason = String(params?.reason ?? "");
+        console.log("[play_song tool]", { vibe, reason });
         if (!vibe) return "no vibe";
         await opts.onPlaySong(vibe, reason);
         return "now playing";
