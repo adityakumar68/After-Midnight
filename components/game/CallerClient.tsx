@@ -7,6 +7,7 @@ import { useLibrary, type LibrarySong } from "@/lib/library/songLibrary";
 import { canonicalizeVibe, expandPrompt } from "@/lib/library/vibes";
 import { startDjSession, type AgentSession } from "@/lib/elevenlabs/agent";
 import { Sfx } from "@/lib/audio/sfx";
+import { unlockAudio } from "@/lib/audio/unlock";
 import { DJS, type Dj } from "@/lib/game/djs";
 import CallerDesign from "@/components/game/CallerDesign";
 import CallerMobile from "@/components/game/CallerMobile";
@@ -55,6 +56,11 @@ export default function CallerClient() {
   }, [micGranted]);
 
   async function grantMic() {
+    // Run the audio unlock primer FIRST while we still have an active gesture.
+    // This warms the global AudioContext + HTMLAudioElement so later async
+    // .play() calls (delayed by dial/ring/agent-connect) actually emit sound
+    // on iOS Safari and Android Chrome.
+    await unlockAudio();
     try {
       const s = await navigator.mediaDevices.getUserMedia({ audio: true });
       s.getTracks().forEach((t) => t.stop());

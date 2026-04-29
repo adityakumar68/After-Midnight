@@ -10,6 +10,7 @@ import { transformToDjVoice, playBlob } from "@/lib/elevenlabs/voiceChanger";
 import { createRecorder, type Recorder } from "@/lib/audio/recorder";
 import { attachMeter, type MeterTap } from "@/lib/audio/analyser";
 import { Sfx } from "@/lib/audio/sfx";
+import { unlockAudio } from "@/lib/audio/unlock";
 import StudioDesign, { mapState } from "@/components/game/StudioDesign";
 import StudioMobile from "@/components/game/StudioMobile";
 import { useLibrary } from "@/lib/library/songLibrary";
@@ -89,6 +90,9 @@ export default function StudioClient() {
   }, []);
 
   async function grantMic() {
+    // Prime the audio system inside the user gesture so async .play() works on
+    // iOS Safari + Android Chrome (both block audio without prior gesture).
+    await unlockAudio();
     try {
       const s = await navigator.mediaDevices.getUserMedia({ audio: true });
       s.getTracks().forEach((t) => t.stop());
