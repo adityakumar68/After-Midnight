@@ -131,7 +131,9 @@ export default function StudioDesign({
 
   const showTurntable = callState === "song_playing";
   const songsActive = callState === "song_select";
-  const songsDimmed = !songsActive && !showTurntable;
+  // Allow clicking records during the live conversation too — natural radio DJ flow.
+  const songsClickable = songsActive || callState === "conversation";
+  const songsDimmed = !songsClickable && !showTurntable;
   const pickedSong = songs[0]; // visual fallback for turntable
 
   // Fit 1280x800 canvas to viewport

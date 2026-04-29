@@ -149,6 +149,9 @@ export default function StudioClient() {
     if (!currentCaller) return;
     const s = songs.find((x) => x.id === id);
     if (!s) return;
+    // Hang up the caller IMMEDIATELY so the song doesn't overlap their voice
+    sessionRef.current?.end().catch(() => {});
+    sessionRef.current = null;
     game.pickSong(s.id);
     const a = new Audio(s.src);
     a.volume = 0.85;
@@ -159,8 +162,6 @@ export default function StudioClient() {
       game.songEnded();
       const reaction = reactionFor(currentCaller, s.vibe);
       console.log("[caller reaction]", reaction.line);
-      sessionRef.current?.end().catch(() => {});
-      sessionRef.current = null;
       setTimeout(() => {
         const d = new Date();
         const hh = String(d.getHours()).padStart(2, "0");
