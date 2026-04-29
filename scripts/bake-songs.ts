@@ -30,18 +30,32 @@ const PROMPTS: Record<string, string[]> = {
   ],
 };
 
+import { existsSync } from "node:fs";
+
 async function bake(vibe: string, prompt: string, n: number) {
   const out = resolve(process.cwd(), `public/audio/songs/${vibe}-${n}.mp3`);
-  console.log(`baking ${vibe}-${n}…`);
-  const r = await fetch("https://api.elevenlabs.io/v1/music", {
-    method: "POST",
-    headers: { "xi-api-key": KEY!, "content-type": "application/json", "accept": "audio/mpeg" },
-    body: JSON.stringify({ prompt, music_length_ms: 15000, output_format: "mp3_44100_128" }),
-  });
-  if (!r.ok) { console.error(`fail ${vibe}-${n}: ${r.status} ${await r.text()}`); return; }
-  const buf = Buffer.from(await r.arrayBuffer());
-  await writeFile(out, buf);
-  console.log(`✔ ${out} (${buf.length} bytes)`);
+  if (existsSync(out)) { console.log(`skip ${vibe}-${n} (exists)`); return; }
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    console.log(`baking ${vibe}-${n}${attempt > 1 ? ` (attempt ${attempt})` : ""}…`);
+    const r = await fetch("https://api.elevenlabs.io/v1/music", {
+      method: "POST",
+      headers: { "xi-api-key": KEY!, "content-type": "application/json", "accept": "audio/mpeg" },
+      body: JSON.stringify({ prompt, music_length_ms: 15000, output_format: "mp3_44100_128" }),
+    });
+    if (r.ok) {
+      const buf = Buffer.from(await r.arrayBuffer());
+      await writeFile(out, buf);
+      console.log(`✔ ${out} (${buf.length} bytes)`);
+      return;
+    }
+    const body = await r.text();
+    console.error(`fail ${vibe}-${n} attempt ${attempt}: ${r.status} ${body.slice(0, 200)}`);
+    if (r.status >= 500 && attempt < 3) {
+      await new Promise((res) => setTimeout(res, 1500 * attempt));
+      continue;
+    }
+    return;
+  }
 }
 
 (async () => {
