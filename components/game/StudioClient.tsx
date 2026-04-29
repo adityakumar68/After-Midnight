@@ -40,6 +40,9 @@ export default function StudioClient() {
   const [callerLevel, setCallerLevel] = useState(0);
   const [micGranted, setMicGranted] = useState(false);
   const [clock, setClock] = useState("");
+  // Voice Changer is the demo-day magic, but it confuses the player during live play.
+  // Default OFF; flip ON when recording the 60s demo.
+  const [djVoiceOn, setDjVoiceOn] = useState(false);
 
   const sessionRef = useRef<AgentSession | null>(null);
   const recRef = useRef<Recorder | null>(null);
@@ -123,10 +126,11 @@ export default function StudioClient() {
     if (!recording || !recRef.current) return;
     setRecording(false);
     const raw = await recRef.current.stop();
+    if (!djVoiceOn) return; // toggle off → skip the playback echo entirely
     transformToDjVoice(raw)
       .then((blob) => { if (blob) return playBlob(blob); })
       .catch((e) => console.error("voice change failed:", (e as Error).message));
-  }, [recording]);
+  }, [recording, djVoiceOn]);
 
   // VU meter tick
   useEffect(() => {
@@ -207,6 +211,30 @@ export default function StudioClient() {
           </div>
         </div>
       )}
+
+      {/* DJ Voice toggle — flip ON only when recording the demo */}
+      <button
+        onClick={() => setDjVoiceOn((v) => !v)}
+        title="Transforms your voice into the DJ voice for the listener. Adds ~800ms playback echo for the player. Turn on for demo recordings."
+        style={{
+          position: "fixed",
+          top: 16,
+          right: 16,
+          zIndex: 80,
+          padding: "8px 14px",
+          fontSize: 11,
+          letterSpacing: "0.24em",
+          textTransform: "uppercase",
+          fontFamily: "var(--font-mono), monospace",
+          color: djVoiceOn ? "var(--on-air)" : "var(--cream-60)",
+          background: djVoiceOn ? "rgba(229,75,60,0.10)" : "rgba(255,179,71,0.05)",
+          border: "1px solid " + (djVoiceOn ? "var(--on-air)" : "rgba(255,179,71,0.25)"),
+          borderRadius: 3,
+          cursor: "pointer",
+        }}
+      >
+        {djVoiceOn ? "● DJ VOICE ON" : "○ DJ VOICE OFF"}
+      </button>
 
       <StudioDesign
         callState={mapState(game.callState)}
