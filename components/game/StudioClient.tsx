@@ -31,28 +31,36 @@ function nowClock(): string {
 export default function StudioClient() {
   const router = useRouter();
   const game = useGame();
-  const [callers] = useState<Caller[]>(() => drawThreeCallers());
-  const [songs, setSongs] = useState<Song[]>(() => threeSongsForCaller(callersAt(0)));
-  function callersAt(_i: number) { return drawThreeCallers()[0]; }
+  // Defer all randomized state to the client mount to avoid SSR hydration mismatch
+  const [callers, setCallers] = useState<Caller[]>([]);
+  const [songs, setSongs] = useState<Song[]>([]);
 
   const [recording, setRecording] = useState(false);
   const [djLevel, setDjLevel] = useState(0);
   const [callerLevel, setCallerLevel] = useState(0);
   const [micGranted, setMicGranted] = useState(false);
-  const [clock, setClock] = useState(nowClock());
+  const [clock, setClock] = useState("");
 
   const sessionRef = useRef<AgentSession | null>(null);
   const recRef = useRef<Recorder | null>(null);
   const meterRef = useRef<MeterTap | null>(null);
 
-  const currentCaller = useMemo(
-    () => callers[Math.min(game.roundIndex, callers.length - 1)],
+  // Initialize randomized state on the client only
+  useEffect(() => {
+    const drawn = drawThreeCallers();
+    setCallers(drawn);
+    setSongs(threeSongsForCaller(drawn[0]));
+    setClock(nowClock());
+  }, []);
+
+  const currentCaller = useMemo<Caller | null>(
+    () => callers[Math.min(game.roundIndex, callers.length - 1)] ?? null,
     [callers, game.roundIndex]
   );
 
-  // Keep songs in sync with current caller
+  // Refresh songs whenever the caller advances
   useEffect(() => {
-    setSongs(threeSongsForCaller(currentCaller));
+    if (currentCaller) setSongs(threeSongsForCaller(currentCaller));
   }, [currentCaller]);
 
   // Update wall clock every minute (cosmetic)
@@ -74,6 +82,7 @@ export default function StudioClient() {
   // Trigger the next call after a brief idle pause
   useEffect(() => {
     if (!micGranted) return;
+    if (!currentCaller) return;
     if (game.callState !== "idle") return;
     if (game.isShowOver()) { router.push("/credits"); return; }
     const t = setTimeout(() => {
@@ -81,9 +90,10 @@ export default function StudioClient() {
       game.startCall();
     }, 1000);
     return () => clearTimeout(t);
-  }, [game.callState, game.roundIndex, micGranted]);
+  }, [game.callState, game.roundIndex, micGranted, currentCaller]);
 
   const onAnswer = useCallback(async () => {
+    if (!currentCaller) return;
     Sfx.stopAll();
     Sfx.onair();
     game.answerCall();
@@ -132,6 +142,7 @@ export default function StudioClient() {
   }, []);
 
   const onPickSong = useCallback((id: string) => {
+    if (!currentCaller) return;
     const s = songs.find((x) => x.id === id);
     if (!s) return;
     game.pickSong(s.id);
@@ -199,13 +210,17 @@ export default function StudioClient() {
 
       <StudioDesign
         callState={mapState(game.callState)}
-        caller={{ name: currentCaller.name, age: currentCaller.age, location: currentCaller.location }}
+        caller={
+          currentCaller
+            ? { name: currentCaller.name, age: currentCaller.age, location: currentCaller.location }
+            : { name: "—", age: 0, location: "—" }
+        }
         callerVuLevel={callerLevel || undefined}
         djVuLevel={djLevel || (recording ? 0.05 : 0)}
         songs={designSongs}
         callIndex={Math.min(game.roundIndex + 1, 3)}
         callTotal={3}
-        clock={clock}
+        clock={clock || "—"}
         onAnswer={onAnswer}
         onPushToTalkStart={onPushToTalkStart}
         onPushToTalkEnd={onPushToTalkEnd}
