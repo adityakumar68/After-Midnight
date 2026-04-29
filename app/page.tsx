@@ -29,12 +29,13 @@ export default function Landing() {
 
           <h1 className="font-serif type-grain" style={{
             margin: 0,
-            fontSize: "clamp(64px, 9.5vw, 112px)",
+            fontSize: "clamp(48px, 9.5vw, 112px)",
             lineHeight: 0.95,
             color: "var(--cream)",
             fontWeight: 400,
             letterSpacing: "-0.01em",
             textShadow: "0 2px 24px rgba(0,0,0,0.6), 0 0 40px rgba(255,179,71,0.08)",
+            whiteSpace: "nowrap",
           }}>
             <TitleReveal text="After Midnight" />
           </h1>

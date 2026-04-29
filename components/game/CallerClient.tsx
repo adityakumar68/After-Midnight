@@ -213,7 +213,7 @@ export default function CallerClient() {
               Allow mic to call in
             </h2>
             <p style={{ marginTop: 10, color: "var(--cream-60)", fontStyle: "italic" }}>
-              Pick a host. They&apos;ll hear what&apos;s keeping you up.
+              The host will pick up. They&apos;ll hear what&apos;s keeping you up.
             </p>
             <button onClick={grantMic} className="btn-walnut" style={{ marginTop: 22 }}>
               Allow Mic
