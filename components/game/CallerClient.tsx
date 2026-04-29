@@ -10,6 +10,8 @@ import { Sfx } from "@/lib/audio/sfx";
 import { DJS, type Dj } from "@/lib/game/djs";
 import CallerDesign from "@/components/game/CallerDesign";
 
+const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
 const TITLES = [
   "Three AM Window", "Tucson Quiet", "If You're Up", "Tape Hiss Lullaby",
   "Headlights, Highway", "Empty Side", "Closet Stars", "Rain on Glass",
@@ -46,10 +48,14 @@ export default function CallerClient() {
     } catch { alert("Mic permission is required to call in."); }
   }
 
+  // Use store.getState() inside async handlers so we don't depend on React-returned
+  // refs (which churn every render and would invalidate useCallback identity).
   const handlePlaySong = useCallback(async (vibe: string, _reason: string) => {
-    game.djAskedForSong(vibe);
+    const cmGame = useCallerGame.getState();
+    const cmLib = useLibrary.getState();
+    cmGame.djAskedForSong(vibe);
     const cn = canonicalizeVibe(vibe);
-    let song: LibrarySong | null = lib.getState().find(vibe);
+    let song: LibrarySong | null = cmLib.find(vibe);
 
     if (!song) {
       const prompt = expandPrompt(vibe);
@@ -60,8 +66,7 @@ export default function CallerClient() {
       });
       if (!r.ok) {
         console.error("[caller] generate-song failed", r.status);
-        const all = lib.getState().all();
-        song = all.find((s) => s.origin === "baked") ?? null;
+        song = cmLib.all().find((s) => s.origin === "baked") ?? null;
       } else {
         const blob = await r.blob();
         const src = URL.createObjectURL(blob);
@@ -74,7 +79,7 @@ export default function CallerClient() {
           origin: "generated",
           durationSec: 15,
         };
-        lib.getState().addGenerated(newSong);
+        cmLib.addGenerated(newSong);
         song = newSong;
       }
     }
@@ -82,52 +87,51 @@ export default function CallerClient() {
     if (!song) return;
     setNowPlaying(song);
     setFlashId(song.id);
-    game.songReady(song.id);
+    useCallerGame.getState().songReady(song.id);
     const a = new Audio(song.src);
     audioRef.current = a;
     a.volume = 0.85;
     void a.play().catch(() => {});
     a.onended = () => {
-      game.songEnded();
-      setTimeout(() => game.hangUp({
+      useCallerGame.getState().songEnded();
+      setTimeout(() => useCallerGame.getState().hangUp({
         vibe, songId: song!.id, songTitle: song!.title, origin: song!.origin,
       }), 6000);
     };
-  }, [game, lib]);
+  }, []);
 
-  // Orchestration: runs ONCE after a DJ is chosen. Uses a ref guard to prevent
-  // re-runs when state transitions cause this effect to re-evaluate.
-  useEffect(() => {
-    if (!micGranted || !chosenDj) return;
+  // Event-driven orchestration (NOT useEffect): triggered when user picks a DJ.
+  // Avoids React strict-mode double-invoke and state-dep cancellation traps.
+  const startCallFlow = useCallback(async (dj: Dj) => {
     if (orchestrationStartedRef.current) return;
     orchestrationStartedRef.current = true;
-
-    let cancelled = false;
-    (async () => {
-      Sfx.ring();
-      await new Promise((r) => setTimeout(r, 2200));
-      if (cancelled) return;
-      game.dialingDone();
-      // Auto-pickup ~2 seconds after ringing starts
-      await new Promise((r) => setTimeout(r, 2000));
-      if (cancelled) return;
-      Sfx.stopAll(); Sfx.onair();
-      game.ringingDone();
-      try {
-        sessionRef.current = await startDjSession({
-          dj: chosenDj,
-          events: { onError: (e) => console.error("[dj]", e) },
-          onPlaySong: handlePlaySong,
-        });
-        game.djSpoke();
-      } catch (e) {
-        console.error("DJ session failed", e);
-        // Fall through so the UI is still functional without a key
-        game.djSpoke();
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [micGranted, chosenDj, handlePlaySong, game]);
+    setChosenDj(dj);
+    console.log("[caller] starting call with", dj.name);
+    Sfx.ring();
+    await wait(2200);
+    useCallerGame.getState().dialingDone();
+    console.log("[caller] dialing done → ringing");
+    await wait(2000);
+    useCallerGame.getState().ringingDone();
+    Sfx.stopAll();
+    Sfx.onair();
+    console.log("[caller] ringing done → connecting agent");
+    try {
+      sessionRef.current = await startDjSession({
+        dj,
+        events: {
+          onConnect: () => console.log("[caller] agent connected"),
+          onError: (e) => console.error("[dj]", e),
+        },
+        onPlaySong: handlePlaySong,
+      });
+      useCallerGame.getState().djSpoke();
+      console.log("[caller] DJ session started → conversation");
+    } catch (e) {
+      console.error("[caller] DJ session failed", e);
+      useCallerGame.getState().djSpoke();
+    }
+  }, [handlePlaySong]);
 
   useEffect(() => {
     if (game.callerState !== "hung_up") return;
@@ -194,7 +198,7 @@ export default function CallerClient() {
       )}
 
       {micGranted && !chosenDj && (
-        <DjPicker djs={DJS} onPick={setChosenDj} />
+        <DjPicker djs={DJS} onPick={startCallFlow} />
       )}
 
       <CallerDesign
