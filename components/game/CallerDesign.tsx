@@ -62,8 +62,10 @@ export default function CallerDesign({
   const [scale, setScale] = useState(1);
   useEffect(() => {
     const fit = () => {
+      const HEADER = 44;
+      const PAD = 16;
       const sx = window.innerWidth / 1280;
-      const sy = window.innerHeight / 800;
+      const sy = (window.innerHeight - HEADER - PAD) / 800;
       setScale(Math.min(sx, sy, 1));
     };
     fit();

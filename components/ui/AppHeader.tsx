@@ -10,7 +10,10 @@ export default function AppHeader() {
         <OnAirLamp state="solid" size={14} />
         <span className="app-header-wordmark">After Midnight</span>
       </Link>
-      <span className="app-header-station">WMID · 88.7 FM</span>
+      <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
+        <Link href="/library" className="app-header-navlink">Library</Link>
+        <span className="app-header-station">WMID · 88.7 FM</span>
+      </div>
     </header>
   );
 }

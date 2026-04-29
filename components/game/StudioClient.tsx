@@ -297,12 +297,14 @@ export default function StudioClient() {
         djVuLevel={djLevel || (recording ? 0.05 : 0)}
         songs={designSongs}
         callIndex={Math.min(game.roundIndex + 1, 3)}
-        callTotal={3}
+        callTotal={game.totalRounds}
         clock={clock || "—"}
         onAnswer={onAnswer}
         onPushToTalkStart={onPushToTalkStart}
         onPushToTalkEnd={onPushToTalkEnd}
         onPickSong={onPickSong}
+        library={fullLibrary}
+        latestGeneratedId={latestGeneratedId}
       />
       </div>
     </>

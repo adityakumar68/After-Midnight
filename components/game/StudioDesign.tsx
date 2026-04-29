@@ -33,6 +33,9 @@ export interface StudioDesignProps {
   onPushToTalkStart?: () => void;
   onPushToTalkEnd?: () => void;
   onPickSong?: (id: string) => void;
+  /** Full library (baked + dynamically generated). Optional — when provided, renders a side panel. */
+  library?: { id: string; title: string; vibe: string; freeformLabel: string; origin: "baked" | "generated" }[];
+  latestGeneratedId?: string | null;
 }
 
 export default function StudioDesign({
@@ -47,6 +50,8 @@ export default function StudioDesign({
   onAnswer,
   onPushToTalkStart,
   onPushToTalkEnd,
+  library,
+  latestGeneratedId = null,
   onPickSong,
 }: StudioDesignProps) {
   // Simulated VU levels when not provided (e.g. before mic granted)
@@ -136,12 +141,14 @@ export default function StudioDesign({
   const songsDimmed = !songsClickable && !showTurntable;
   const pickedSong = songs[0]; // visual fallback for turntable
 
-  // Fit 1280x800 canvas to viewport
+  // Fit 1280x800 canvas to viewport — subtract header (44px) and a small bottom safety pad
   const [scale, setScale] = useState(1);
   useEffect(() => {
     const fit = () => {
+      const HEADER = 44;
+      const PAD = 16;
       const sx = window.innerWidth / 1280;
-      const sy = window.innerHeight / 800;
+      const sy = (window.innerHeight - HEADER - PAD) / 800;
       setScale(Math.min(sx, sy, 1));
     };
     fit();
@@ -185,11 +192,91 @@ export default function StudioDesign({
               pickedSong={pickedSong}
               onPick={(id) => onPickSong?.(id)}
             />
+            {library && library.length > 0 && (
+              <DesktopStacksPanel
+                library={library}
+                latestGeneratedId={latestGeneratedId}
+                onPick={(id) => onPickSong?.(id)}
+                clickable={callState === "conversation" || callState === "song_select"}
+              />
+            )}
             {callState === "incoming" && <IncomingPhone onAnswer={() => onAnswer?.()} />}
           </div>
         </div>
       </div>
     </Booth>
+  );
+}
+
+/* ============== DESKTOP STACKS PANEL — full growing library ============== */
+function DesktopStacksPanel({ library, latestGeneratedId, onPick, clickable }: {
+  library: { id: string; title: string; vibe: string; freeformLabel: string; origin: "baked" | "generated" }[];
+  latestGeneratedId: string | null;
+  onPick: (id: string) => void;
+  clickable: boolean;
+}) {
+  const all = library.slice().reverse();
+  return (
+    <div style={{
+      position: "absolute",
+      top: 130, right: 22, bottom: 246,
+      width: 240,
+      background: "linear-gradient(180deg, rgba(26,15,8,0.92) 0%, rgba(15,9,5,0.95) 100%)",
+      border: "1px solid rgba(255,179,71,0.20)",
+      borderRadius: 8,
+      padding: "12px 10px",
+      display: "flex",
+      flexDirection: "column",
+      gap: 6,
+      overflowY: "auto",
+      boxShadow: "inset 0 1px 0 rgba(255,179,71,0.10), 0 8px 22px rgba(0,0,0,0.5)",
+      zIndex: 20,
+    }}>
+      <div className="font-plex" style={{
+        fontSize: 10, letterSpacing: "0.32em",
+        color: "var(--cream-30)",
+        marginBottom: 4,
+        position: "sticky", top: 0,
+        background: "linear-gradient(180deg, rgba(26,15,8,0.95) 0%, rgba(26,15,8,0.85) 100%)",
+        padding: "4px 0",
+        zIndex: 1,
+      }}>
+        STACKS · {library.length}{clickable ? " · TAP" : ""}
+      </div>
+      {all.map((s) => {
+        const isFresh = s.id === latestGeneratedId;
+        const card = (
+          <>
+            <div style={{ fontWeight: 600 }}>{s.title}</div>
+            <div style={{
+              fontSize: 9, opacity: 0.65, letterSpacing: "0.2em",
+              textTransform: "uppercase", marginTop: 2,
+            }}>
+              {isFresh ? "+ NEW · WRITTEN FOR YOU" : "FROM THE STACKS"} · {s.freeformLabel}
+            </div>
+          </>
+        );
+        const baseStyle: React.CSSProperties = {
+          background: isFresh
+            ? "linear-gradient(180deg, #f2ead3 0%, #e6dcc0 100%)"
+            : "rgba(255,179,71,0.06)",
+          color: isFresh ? "#2a1a0f" : "var(--cream)",
+          padding: "7px 9px", borderRadius: 3,
+          border: "1px solid " + (isFresh ? "#c8b58a" : "rgba(255,179,71,0.18)"),
+          fontFamily: "var(--font-plex)", fontSize: 11,
+          textAlign: "left", width: "100%",
+          flexShrink: 0,
+        };
+        if (clickable) {
+          return (
+            <button key={s.id} onClick={() => onPick(s.id)} style={{ ...baseStyle, cursor: "pointer" }}>
+              {card}
+            </button>
+          );
+        }
+        return <div key={s.id} style={baseStyle}>{card}</div>;
+      })}
+    </div>
   );
 }
 
