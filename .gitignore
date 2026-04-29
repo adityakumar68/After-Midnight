@@ -33,3 +33,9 @@ pnpm-debug.log*
 
 # Audio assets are committed so Vercel deploys them.
 # Re-bake with `npm run bake:songs` and `npm run bake:sfx` to regenerate.
+
+# Video render artifacts (huge mp4 outputs)
+media/video/*.mp4
+media/video/.hyperframes/
+media/video/assets/personal.mp4
+media/video/assets/platform-*.mp4
