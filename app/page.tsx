@@ -1,25 +1,117 @@
-import Link from "next/link";
+"use client";
+
+import { useRouter } from "next/navigation";
+import { Booth, OnAirLamp, Typewriter, VuBar } from "@/components/ui/atmosphere";
 
 export default function Landing() {
+  const router = useRouter();
   return (
-    <main className="relative z-10 mx-auto flex min-h-screen max-w-[720px] flex-col items-center justify-center px-6 text-center">
-      <div className="mb-3 flex items-center gap-2 text-[12px] tracking-[0.25em] text-[--cream-60] font-mono">
-        <span className="inline-block h-3 w-3 rounded-full bg-[--on-air] animate-pulse" />
-        AFTER MIDNIGHT — A RADIO SHOW
+    <Booth>
+      <div className="scene">
+        <div style={{
+          maxWidth: 720,
+          width: "100%",
+          padding: "0 32px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          textAlign: "center",
+          position: "relative",
+          zIndex: 10,
+        }}>
+          <div style={{ marginBottom: 22 }}>
+            <OnAirLamp state="pulse" size={26} />
+          </div>
+
+          <div className="font-mono tracked" style={{
+            fontSize: 13,
+            color: "var(--cream-60)",
+            letterSpacing: "0.36em",
+            marginBottom: 38,
+            animation: "fade-in 1.4s ease-out both",
+          }}>
+            AFTER MIDNIGHT &nbsp;—&nbsp; A RADIO SHOW
+          </div>
+
+          <h1 className="font-serif type-grain" style={{
+            margin: 0,
+            fontSize: "clamp(64px, 9.5vw, 112px)",
+            lineHeight: 0.95,
+            color: "var(--cream)",
+            fontWeight: 400,
+            letterSpacing: "-0.01em",
+            textShadow: "0 2px 24px rgba(0,0,0,0.6), 0 0 40px rgba(255,179,71,0.08)",
+          }}>
+            <TitleReveal text="After Midnight" />
+          </h1>
+
+          <p style={{
+            marginTop: 28,
+            marginBottom: 0,
+            fontSize: 18,
+            fontStyle: "italic",
+            color: "var(--cream)",
+            opacity: 0.85,
+            lineHeight: 1.45,
+            maxWidth: 560,
+            animation: "fade-up 1.2s 1.4s ease-out both",
+          }}>
+            Three callers. One quiet hour. You&apos;re the only one still up.
+          </p>
+
+          <button
+            className="btn-walnut"
+            onClick={() => router.push("/studio")}
+            style={{
+              marginTop: 56,
+              animation: "fade-up 1.2s 2.0s ease-out both",
+            }}
+          >
+            Start the Show
+            <span style={{ fontSize: 14, opacity: 0.7 }}>→</span>
+          </button>
+
+          <div style={{
+            marginTop: 96,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 14,
+            animation: "fade-in 1.5s 2.6s ease-out both",
+          }}>
+            <VuBar width={260} height={10} freq={0.2} />
+            <div className="font-mono tracked" style={{
+              fontSize: 11,
+              color: "var(--cream-30)",
+              letterSpacing: "0.3em",
+            }}>
+              BUILT FOR ELEVENHACKS #6 &nbsp;·&nbsp; ZED × ELEVENLABS
+            </div>
+          </div>
+        </div>
       </div>
-      <h1 className="font-serif text-7xl md:text-8xl text-[--cream]">After Midnight</h1>
-      <p className="mt-4 text-lg italic text-[--cream-60]">
-        Three callers. One quiet hour. You&apos;re the only one still up.
-      </p>
-      <Link
-        href="/studio"
-        className="mt-10 rounded-full border border-[--amber] bg-[--walnut-surface] px-8 py-3 text-[--amber] font-mono tracking-widest hover:shadow-[0_0_24px_rgba(255,179,71,0.45)] transition"
-      >
-        START THE SHOW
-      </Link>
-      <p className="mt-12 text-[11px] text-[--cream-30] font-mono">
-        Built for ElevenHacks #6 — Zed × ElevenLabs
-      </p>
-    </main>
+    </Booth>
+  );
+}
+
+function TitleReveal({ text }: { text: string }) {
+  const chars = text.split("");
+  return (
+    <span aria-label={text} style={{ display: "inline-block" }}>
+      {chars.map((c, i) => (
+        <span
+          key={i}
+          style={{
+            display: "inline-block",
+            opacity: 0,
+            transform: "translateY(28px)",
+            animation: `title-rise 1.2s ${0.2 + i * 0.03}s cubic-bezier(0.2, 0.8, 0.2, 1) forwards`,
+            whiteSpace: c === " " ? "pre" : "normal",
+          }}
+        >
+          {c}
+        </span>
+      ))}
+    </span>
   );
 }

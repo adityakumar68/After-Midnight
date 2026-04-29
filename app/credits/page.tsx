@@ -1,57 +1,253 @@
 "use client";
-import Link from "next/link";
-import { useGame } from "@/lib/game/machine";
 
-export default function Credits() {
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useGame } from "@/lib/game/machine";
+import { Booth, Typewriter } from "@/components/ui/atmosphere";
+
+const FALLBACK = [
+  { time: "03:12 AM", name: "TOM",  age: 47, location: "NEBRASKA", songVibe: "Dusty Country" },
+  { time: "03:47 AM", name: "MIRA", age: 24, location: "PORTLAND", songVibe: "Synthwave Heartbreak" },
+  { time: "04:21 AM", name: "ELI",  age: 9,  location: "INDIANA",  songVibe: "Lullaby Piano" },
+];
+
+export default function CreditsPage() {
+  const router = useRouter();
   const game = useGame();
-  const tweet = encodeURIComponent(
-    "I just spent an hour as a 3 AM radio DJ. Built with @zeddotdev + @elevenlabsio for #ElevenHacks 🎙️📻"
-  );
-  const log = game.history.length
-    ? game.history
-    : [
-        { time: "03:12", callerName: "TOM", callerAge: 47, callerLocation: "NEBRASKA", songTitle: "—", songVibe: "—", callerId: "tom" },
-        { time: "03:47", callerName: "MIRA", callerAge: 24, callerLocation: "PORTLAND", songTitle: "—", songVibe: "—", callerId: "mira" },
-        { time: "04:21", callerName: "ELI", callerAge: 9, callerLocation: "INDIANA", songTitle: "—", songVibe: "—", callerId: "eli" },
-      ];
+
+  const callsCompleted = game.history.length
+    ? game.history.map((h) => ({
+        time: h.time + " AM",
+        name: h.callerName.toUpperCase(),
+        age: h.callerAge,
+        location: h.callerLocation.toUpperCase(),
+        songVibe: h.songTitle && h.songTitle !== "—" ? h.songTitle : h.songVibe.replace(/-/g, " "),
+      }))
+    : FALLBACK;
+
+  const [titleDone, setTitleDone] = useState(false);
+  const [breath, setBreath] = useState(false);
+  const [crackle, setCrackle] = useState(0);
+
+  useEffect(() => {
+    const id = setTimeout(() => setBreath(true), 8000);
+    return () => clearTimeout(id);
+  }, []);
+
+  useEffect(() => {
+    let raf = 0;
+    const tick = (t: number) => { setCrackle(t / 1000); raf = requestAnimationFrame(tick); };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  const handleShare = () => {
+    const text = "I just spent an hour as a 3 AM radio DJ. Built with @zeddotdev + @elevenlabsio for #ElevenHacks 🎙️📻";
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    if (typeof navigator !== "undefined" && (navigator as Navigator & { share?: (data: ShareData) => Promise<void> }).share && /Mobi|Android/i.test(navigator.userAgent)) {
+      (navigator as Navigator & { share: (data: ShareData) => Promise<void> }).share({ title: "After Midnight", text, url }).catch(() => {});
+    } else {
+      const tweet = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+      window.open(tweet, "_blank", "noopener,noreferrer");
+    }
+  };
+
+  const onPlayAgain = () => {
+    game.reset();
+    router.push("/studio");
+  };
 
   return (
-    <main className="relative z-10 mx-auto max-w-[600px] px-6 py-24 text-center">
-      <h1 className="font-serif text-6xl text-[--cream]">Good night.</h1>
-      <p className="mt-4 italic text-[--cream-60]">Thanks for staying up with us. The callers will remember.</p>
+    <Booth dim>
+      <div className="credits-scroll" style={{
+        animation: breath ? "deep-breath 6s ease-in-out infinite" : "none",
+      }}>
+        <div style={{
+          maxWidth: 600,
+          width: "100%",
+          padding: "0 32px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          textAlign: "center",
+          zIndex: 10,
+        }}>
+          <div style={{ marginBottom: 28, opacity: 0.5, animation: "fade-in 1.4s ease-out both" }}>
+            <span className="on-air-lamp dim" style={{ width: 24, height: 24 }}>
+              <svg viewBox="0 0 32 32" fill="none">
+                <path d="M16 2 C 18 9, 23 14, 30 16 C 23 18, 18 23, 16 30 C 14 23, 9 18, 2 16 C 9 14, 14 9, 16 2 Z" fill="#3a3a3a" />
+                <circle cx="16" cy="16" r="3" fill="#666" />
+              </svg>
+            </span>
+            <div className="font-mono tracked" style={{
+              fontSize: 11,
+              color: "rgba(242,234,211,0.2)",
+              letterSpacing: "0.36em",
+              marginTop: 6,
+            }}>OFF AIR</div>
+          </div>
 
-      <div className="mx-auto mt-12 max-w-[420px] rotate-[-1deg] rounded bg-[--cream] p-6 text-left font-mono text-[--walnut] shadow-2xl">
-        <div className="mb-3 text-[10px] tracking-widest opacity-70">— TONIGHT&apos;S LOG —</div>
-        <div className="text-sm leading-7">
-          {log.map((l, i) => (
-            <div key={i}>
-              {l.time} — {l.callerName.toUpperCase()}, {l.callerAge} — {l.callerLocation.toUpperCase()}
-              {l.songTitle && l.songTitle !== "—" ? ` — “${l.songTitle}”` : ""}
+          <h1 className="font-serif" style={{
+            margin: 0,
+            fontSize: "clamp(54px, 7vw, 84px)",
+            color: "var(--cream)",
+            fontWeight: 400,
+            letterSpacing: "-0.01em",
+            lineHeight: 1.0,
+          }}>
+            <Typewriter
+              text="Good night."
+              delayMs={90}
+              startMs={300}
+              as="span"
+              onDone={() => setTitleDone(true)}
+            />
+            {titleDone && (
+              <span style={{
+                display: "inline-block",
+                marginLeft: -18,
+                color: "var(--cream)",
+                animation: "period-glow 2.4s ease-out 0.2s 1",
+              }} />
+            )}
+          </h1>
+
+          <p style={{
+            marginTop: 24,
+            fontStyle: "italic",
+            fontSize: 17,
+            color: "var(--cream)",
+            opacity: 0.8,
+            animation: "fade-up 1.4s 1.6s ease-out both",
+          }}>
+            Thanks for staying up with us. The callers will remember.
+          </p>
+
+          <div style={{
+            marginTop: 48,
+            background: "linear-gradient(180deg, #f2ead3 0%, #e6dcc0 100%)",
+            color: "#2a1a0f",
+            padding: "26px 32px",
+            transform: "rotate(-1deg)",
+            boxShadow: "0 12px 32px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.4)",
+            border: "1px solid #c8b58a",
+            width: "100%",
+            maxWidth: 520,
+            position: "relative",
+            animation: "card-settle 1.2s 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both",
+          }}>
+            <div style={{
+              position: "absolute", inset: 0,
+              backgroundImage:
+                "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.9'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.2'/></svg>\")",
+              mixBlendMode: "multiply",
+              pointerEvents: "none",
+            }} />
+
+            <div className="font-plex" style={{
+              fontSize: 10,
+              letterSpacing: "0.36em",
+              opacity: 0.5,
+              textAlign: "left",
+              marginBottom: 14,
+              borderBottom: "1px dashed rgba(58,37,21,0.3)",
+              paddingBottom: 8,
+            }}>PLAYLIST LOG · WMID 88.7 · TONIGHT</div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {callsCompleted.map((c, i) => (
+                <div key={i} className="font-plex" style={{
+                  fontSize: 14,
+                  letterSpacing: "0.04em",
+                  textAlign: "left",
+                  display: "grid",
+                  gridTemplateColumns: "92px 1fr auto",
+                  gap: 14,
+                  alignItems: "baseline",
+                }}>
+                  <span style={{ opacity: 0.6 }}>{c.time}</span>
+                  <span>
+                    <span style={{ fontWeight: 700 }}>{c.name}</span>
+                    <span style={{ opacity: 0.55 }}>, {c.age} · {c.location}</span>
+                  </span>
+                  <span style={{
+                    fontStyle: "italic",
+                    opacity: 0.85,
+                    transform: `rotate(${(i - 1) * 0.6}deg)`,
+                    background: "rgba(229,75,60,0.08)",
+                    padding: "1px 6px",
+                  }}>&ldquo;{c.songVibe}&rdquo;</span>
+                </div>
+              ))}
             </div>
-          ))}
+
+            <div className="font-plex" style={{
+              position: "absolute",
+              right: 18, bottom: 10,
+              fontSize: 9,
+              letterSpacing: "0.3em",
+              color: "var(--on-air)",
+              border: "1.5px solid var(--on-air)",
+              padding: "3px 8px",
+              transform: "rotate(-6deg)",
+              opacity: 0.7,
+            }}>END OF SHOW</div>
+          </div>
+
+          <div style={{
+            marginTop: 44,
+            display: "flex",
+            gap: 16,
+            flexWrap: "wrap",
+            justifyContent: "center",
+            animation: "fade-up 1.4s 2.0s ease-out both",
+          }}>
+            <button className="btn-walnut" onClick={onPlayAgain}>
+              Record Another Night
+            </button>
+            <button className="btn-amber-outline" onClick={handleShare}>
+              Share the Show
+            </button>
+          </div>
+
+          <div className="font-mono" style={{
+            marginTop: 56,
+            fontSize: 11,
+            color: "var(--cream-30)",
+            letterSpacing: "0.18em",
+            lineHeight: 1.6,
+            maxWidth: 520,
+            animation: "fade-in 2s 2.6s ease-out both",
+          }}>
+            BUILT IN 24H WITH ZED AND ELEVENLABS CONVERSATIONAL AI.<br />
+            VOICES ARE AI. STORIES ARE MADE UP. FEELINGS ARE REAL.
+          </div>
         </div>
       </div>
 
-      <div className="mt-10 flex justify-center gap-4">
-        <Link
-          href="/studio"
-          onClick={() => game.reset()}
-          className="rounded-full bg-[--walnut-surface] px-6 py-3 font-mono text-[--cream] hover:opacity-80"
-        >
-          RECORD ANOTHER NIGHT
-        </Link>
-        <a
-          href={`https://twitter.com/intent/tweet?text=${tweet}`}
-          target="_blank" rel="noopener noreferrer"
-          className="rounded-full border border-[--amber] px-6 py-3 font-mono text-[--amber] hover:shadow-[0_0_24px_rgba(255,179,71,0.45)]"
-        >
-          SHARE THE SHOW
-        </a>
+      <div style={{
+        position: "fixed",
+        left: 0, right: 0, bottom: 0,
+        height: 24,
+        zIndex: 20,
+        opacity: 0.18,
+        pointerEvents: "none",
+        display: "flex",
+        alignItems: "flex-end",
+        gap: 1,
+        padding: "0 4px",
+      }}>
+        {Array.from({ length: 200 }, (_, i) => {
+          const v = Math.abs(Math.sin(crackle * 0.6 + i * 0.31) * Math.cos(crackle * 0.2 + i * 0.07));
+          const spike = i % 27 === 13 ? 1.6 : 1;
+          return <div key={i} style={{
+            flex: 1,
+            height: Math.max(1, v * 12 * spike),
+            background: "var(--amber)",
+            opacity: 0.6,
+          }} />;
+        })}
       </div>
-
-      <p className="mt-16 text-[11px] text-[--cream-30]">
-        Built in 24h with Zed and ElevenLabs Conversational AI. Voices are AI. Stories are made up. Feelings are real.
-      </p>
-    </main>
+    </Booth>
   );
 }
