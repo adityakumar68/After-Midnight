@@ -11,27 +11,30 @@ const ERIC = "3WqHLnw80rOZqJzW9YRB"; // Same voice as DJ Kai
 
 const VO_SCRIPT = [
   "It's three fourteen in the morning. The city's asleep. Your thoughts aren't.",
-  "There used to be radio shows for this. Voices on AM frequencies that picked up when no one else would. Most of them are gone now.",
-  "So we tried to bring one back.",
-  "This is After Midnight.",
-  "You call in. An AI DJ picks up. The good kind of listening — slow, gentle, doesn't rush you.",
+  "There used to be radio shows for this. AM frequencies that picked up when no one else would. Most of them are gone now.",
+  "So we made a new one. After Midnight. A radio show that didn't exist yesterday.",
+  "You can call in. An AI DJ picks up. Pick a host — Kai is warm, Luna is sultry, Hank is gravelly country. Each one a different voice, a different listener.",
+  "Hold push-to-talk. Tell them what's keeping you up.",
   // -- 12s pause baked in via separate render or post-edit --
-  "And then, while you're still on the line, he writes you a song. Sixty seconds. With vocals. With lyrics. About your night.",
-  "Nobody has heard it before. Nobody will hear it again. It belongs to this call.",
-  "Or you flip the booth. Take the chair. Three callers waiting on the other end of three lonely cities. You find each of them the song they came looking for.",
-  "Built in twenty-four hours, with Zed and ElevenLabs. The voices are real. The songs are real. Only the DJ is artificial — and tonight, even he is yours.",
+  "After two or three exchanges, the DJ picks up something true about your night. And — while you're still on the line — they write you a song.",
+  "Sixty seconds. With vocals. With lyrics. Drawn from what you said. Generated live by ElevenLabs Music API.",
+  "Never heard before. Never heard again. It joins the stacks. Tomorrow, someone else's song will join too. The library grows every night.",
+  "Or flip the booth. Take the chair yourself. Three strangers ringing in tonight. Mira, twenty-four. Tom, forty-seven, on I-eighty. Eli, nine, his goldfish died.",
+  "ElevenLabs Conversational Agents pick up the line. Voice Changer makes you sound like the warm voice the night needs. You hear them out. You find each one a song.",
+  "Visit slash library and you can see every song ever written here. Categorized. Yours and everyone else's.",
+  "Built in twenty-four hours. With Zed. With ElevenLabs.",
   "After Midnight. The booth's still warm.",
 ].join("\n\n");
 
 const VO_PRE_GAP = VO_SCRIPT
   .split("\n\n")
   .slice(0, 5)
-  .join("\n\n"); // intro through "doesn't rush you"
+  .join("\n\n"); // intro through "Tell them what's keeping you up"
 
 const VO_POST_GAP = VO_SCRIPT
   .split("\n\n")
   .slice(5)
-  .join("\n\n"); // from "And then, while you're still on the line" → end
+  .join("\n\n"); // from "After two or three exchanges" → end
 
 const MUSIC_PROMPT = "Cinematic ambient bed for a melancholy late-night radio short film. Soft Rhodes piano, distant rain, faint vinyl crackle, very gentle string pad swelling and falling, no drums, no vocals. Late night, 3 AM, hopeful melancholy. Slow tempo. 110 seconds.";
 

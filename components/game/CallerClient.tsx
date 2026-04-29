@@ -31,6 +31,9 @@ export default function CallerClient() {
   const [recording, setRecording] = useState(false);
   const [flashId, setFlashId] = useState<string | null>(null);
   const [nowPlaying, setNowPlaying] = useState<LibrarySong | null>(null);
+  const [lastAgentLine, setLastAgentLine] = useState<string | null>(null);
+  const [lastUserLine, setLastUserLine] = useState<string | null>(null);
+  const [djReason, setDjReason] = useState<string | null>(null);
   const sessionRef = useRef<AgentSession | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const orchestrationStartedRef = useRef(false);
@@ -70,10 +73,11 @@ export default function CallerClient() {
 
   // Use store.getState() inside async handlers so we don't depend on React-returned
   // refs (which churn every render and would invalidate useCallback identity).
-  const handlePlaySong = useCallback(async (vibe: string, _reason: string) => {
+  const handlePlaySong = useCallback(async (vibe: string, reason: string) => {
     const cmGame = useCallerGame.getState();
     const cmLib = useLibrary.getState();
     cmGame.djAskedForSong(vibe);
+    setDjReason(reason || null);
     const cn = canonicalizeVibe(vibe);
     let song: LibrarySong | null = cmLib.find(vibe);
 
@@ -155,6 +159,8 @@ export default function CallerClient() {
         events: {
           onConnect: () => console.log("[caller] agent connected"),
           onError: (e) => console.error("[dj]", e),
+          onAgentResponse: (text) => setLastAgentLine(text),
+          onUserTranscript: (text) => setLastUserLine(text),
         },
         onPlaySong: handlePlaySong,
       });
@@ -252,7 +258,11 @@ export default function CallerClient() {
           library={library}
           flashSongId={flashId}
           djName={chosenDj?.name ?? "DJ"}
+          djTagline={chosenDj?.tagline}
           latestGeneratedId={latestGeneratedId}
+          lastAgentLine={lastAgentLine}
+          lastUserLine={lastUserLine}
+          djReason={djReason}
         />
       </div>
       <div className="booth-mobile">
@@ -267,7 +277,11 @@ export default function CallerClient() {
           library={library}
           flashSongId={flashId}
           djName={chosenDj?.name ?? "DJ"}
+          djTagline={chosenDj?.tagline}
           latestGeneratedId={latestGeneratedId}
+          lastAgentLine={lastAgentLine}
+          lastUserLine={lastUserLine}
+          djReason={djReason}
         />
       </div>
     </>

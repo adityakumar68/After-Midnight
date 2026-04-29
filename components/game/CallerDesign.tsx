@@ -17,7 +17,11 @@ export interface CallerDesignProps {
   library: LibrarySong[];
   flashSongId: string | null;
   djName?: string;
+  djTagline?: string;
   latestGeneratedId?: string | null;
+  lastAgentLine?: string | null;
+  lastUserLine?: string | null;
+  djReason?: string | null;
 }
 
 export default function CallerDesign({
@@ -25,7 +29,11 @@ export default function CallerDesign({
   onPtDown, onPtUp, onHangUp,
   pendingVibe, nowPlaying, library, flashSongId,
   djName = "DJ",
+  djTagline = "Late-night host",
   latestGeneratedId = null,
+  lastAgentLine = null,
+  lastUserLine = null,
+  djReason = null,
 }: CallerDesignProps) {
   const [simDj, setSimDj] = useState(0);
   useEffect(() => {
@@ -144,8 +152,17 @@ export default function CallerDesign({
                 }}>YOUR LINE</div>
               </div>
 
-              <LibraryPanel library={library} flashSongId={flashSongId} pendingVibe={pendingVibe}
-                loading={callerState === "song_loading"} latestGeneratedId={latestGeneratedId} />
+              <TonightCard
+                callerState={callerState}
+                djName={djName}
+                djTagline={djTagline}
+                pendingVibe={pendingVibe}
+                nowPlaying={nowPlaying}
+                lastAgentLine={lastAgentLine}
+                lastUserLine={lastUserLine}
+                djReason={djReason}
+                libraryCount={library.length}
+              />
             </div>
 
             <Turntable visible={callerState === "song_playing"} song={nowPlaying} />
@@ -283,60 +300,189 @@ function PushToTalkButton({ enabled, ptDown, onDown, onUp }: {
   );
 }
 
-function LibraryPanel({ library, flashSongId, pendingVibe, loading, latestGeneratedId }: {
-  library: LibrarySong[]; flashSongId: string | null; pendingVibe: string | null; loading: boolean; latestGeneratedId: string | null;
+/* TONIGHT'S CARD — caller-side state-aware panel.
+ * Replaces the "RECORD STACKS" view (which only made sense for the DJ).
+ * Shows the AI host's PROCESS in real time: who picks up, what they hear,
+ * what they're writing, and what tonight's song was when it ends. */
+function TonightCard({
+  callerState, djName, djTagline, pendingVibe, nowPlaying,
+  lastAgentLine, lastUserLine, djReason, libraryCount,
+}: {
+  callerState: CallerState;
+  djName: string;
+  djTagline: string;
+  pendingVibe: string | null;
+  nowPlaying: LibrarySong | null;
+  lastAgentLine: string | null;
+  lastUserLine: string | null;
+  djReason: string | null;
+  libraryCount: number;
 }) {
+  const headerLabel =
+    callerState === "dialing"      ? "DIALING…" :
+    callerState === "ringing"      ? "RINGING …" :
+    callerState === "connected"    ? "CONNECTED" :
+    callerState === "conversation" ? "ON THE LINE" :
+    callerState === "song_loading" ? "WRITING" :
+    callerState === "song_playing" ? "NOW PLAYING" :
+    callerState === "outro"        ? "WRAPPING" :
+    "CALL ENDED";
+
   return (
     <div style={{
-      background: "#1a0f08", border: "1px solid rgba(255,179,71,0.15)",
-      borderRadius: 8, padding: 14, overflow: "hidden",
-      display: "flex", flexDirection: "column", gap: 8,
+      background: "linear-gradient(180deg, #1a0f08 0%, #0f0805 100%)",
+      border: "1px solid rgba(255,179,71,0.18)",
+      borderRadius: 8, padding: 18, overflow: "hidden",
+      display: "flex", flexDirection: "column", gap: 12,
     }}>
-      <div className="font-plex" style={{
-        fontSize: 10, letterSpacing: "0.32em",
-        color: "var(--cream-30)", marginBottom: 4,
-      }}>RECORD STACKS · {library.length}</div>
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+        <div className="font-plex" style={{
+          fontSize: 10, letterSpacing: "0.32em", color: "var(--cream-30)",
+        }}>TONIGHT&apos;S CARD</div>
+        <div className="font-plex" style={{
+          fontSize: 10, letterSpacing: "0.28em",
+          color: "var(--amber)",
+          opacity: 0.8,
+        }}>{headerLabel}</div>
+      </div>
+
+      {/* Host name plate */}
       <div style={{
-        flex: 1, overflowY: "auto", display: "flex",
-        flexDirection: "column", gap: 6, paddingRight: 4,
+        background: "linear-gradient(180deg, #f2ead3 0%, #e6dcc0 100%)",
+        color: "#2a1a0f",
+        padding: "12px 14px",
+        borderRadius: 3,
+        border: "1px solid #c8b58a",
+        transform: "rotate(-0.6deg)",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.4)",
       }}>
-        {loading && (
+        <div className="font-plex" style={{ fontSize: 9, letterSpacing: "0.36em", opacity: 0.55 }}>
+          HOST · WMID 88.7
+        </div>
+        <div className="font-serif" style={{ fontSize: 28, lineHeight: 1.1, marginTop: 4 }}>
+          {djName}
+        </div>
+        <div className="font-plex" style={{ fontSize: 11, opacity: 0.7, marginTop: 2, fontStyle: "italic" }}>
+          {djTagline}
+        </div>
+      </div>
+
+      {/* State-aware center block */}
+      <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 10, paddingRight: 4 }}>
+        {(callerState === "dialing" || callerState === "ringing") && (
+          <div className="font-plex" style={{
+            color: "var(--cream-60)", fontStyle: "italic", fontSize: 13,
+            lineHeight: 1.5, padding: "8px 0",
+          }}>
+            <span style={{ color: "var(--amber)" }}>{djName}</span> is reaching for the receiver…
+          </div>
+        )}
+
+        {(callerState === "connected" || callerState === "conversation" || callerState === "outro") && (
+          <>
+            {lastAgentLine && (
+              <TranscriptLine who={djName.toUpperCase()} text={lastAgentLine} amber />
+            )}
+            {lastUserLine && (
+              <TranscriptLine who="YOU" text={lastUserLine} />
+            )}
+            {!lastAgentLine && !lastUserLine && (
+              <div className="font-plex" style={{
+                color: "var(--cream-30)", fontSize: 12,
+                fontStyle: "italic", padding: "8px 0",
+              }}>
+                Hold <span style={{ color: "var(--amber)" }}>SPACE</span> or the TALK button to speak.
+                {djName} is listening.
+              </div>
+            )}
+          </>
+        )}
+
+        {callerState === "song_loading" && (
           <div style={{
             background: "rgba(255,179,71,0.10)",
             border: "1px dashed var(--amber)",
-            padding: "8px 10px", borderRadius: 4,
-            color: "var(--amber)", fontSize: 11,
-            fontFamily: "var(--font-mono)", letterSpacing: "0.18em",
-            animation: "amber-pulse-fast 1.1s ease-in-out infinite",
+            padding: "12px 14px", borderRadius: 4,
           }}>
-            ✎ KAI IS WRITING — {pendingVibe?.toUpperCase() ?? "…"}
+            <div className="font-mono" style={{
+              color: "var(--amber)", fontSize: 11,
+              letterSpacing: "0.22em",
+              animation: "amber-pulse-fast 1.1s ease-in-out infinite",
+            }}>
+              ✎ {djName.toUpperCase()} IS WRITING
+            </div>
+            <div className="font-serif" style={{
+              color: "var(--cream)", fontSize: 18, marginTop: 6, lineHeight: 1.25,
+            }}>
+              {pendingVibe ?? "Tuning in…"}
+            </div>
+            {djReason && (
+              <div className="font-plex" style={{
+                color: "var(--cream-60)", fontStyle: "italic",
+                fontSize: 11, marginTop: 8, lineHeight: 1.5,
+                borderTop: "1px dashed rgba(255,179,71,0.25)", paddingTop: 6,
+              }}>
+                {djReason}
+              </div>
+            )}
           </div>
         )}
-        {library.slice().reverse().map((s) => {
-          const flash = s.id === flashSongId;
-          // Only the freshest generated song wears the "WRITTEN FOR YOU" cream paper.
-          // Previously generated tracks settle into the regular dark "FROM THE STACKS" treatment.
-          const isFreshGen = s.id === latestGeneratedId;
-          return (
-            <div key={s.id} style={{
-              background: isFreshGen
-                ? "linear-gradient(180deg, #f2ead3 0%, #e6dcc0 100%)"
-                : "rgba(255,179,71,0.06)",
-              color: isFreshGen ? "#2a1a0f" : "var(--cream)",
-              padding: "8px 10px", borderRadius: 3,
-              border: "1px solid " + (isFreshGen ? "#c8b58a" : "rgba(255,179,71,0.20)"),
-              fontFamily: "var(--font-plex)", fontSize: 12,
-              boxShadow: flash ? "0 0 18px rgba(255,179,71,0.7)" : "none",
-              transition: "box-shadow 350ms ease",
-              display: "flex", flexDirection: "column", gap: 2,
-            }}>
-              <div style={{ fontWeight: 600, letterSpacing: "0.04em" }}>{s.title}</div>
-              <div style={{ fontSize: 9, opacity: 0.6, letterSpacing: "0.2em", textTransform: "uppercase" }}>
-                {isFreshGen ? "+ WRITTEN FOR YOU" : "FROM THE STACKS"} · {s.freeformLabel}
-              </div>
+
+        {callerState === "song_playing" && nowPlaying && (
+          <div style={{
+            background: "linear-gradient(180deg, #f2ead3 0%, #e6dcc0 100%)",
+            color: "#2a1a0f", padding: "14px 14px", borderRadius: 4,
+            border: "1px solid #c8b58a",
+            boxShadow: "0 0 22px rgba(255,179,71,0.45)",
+          }}>
+            <div className="font-plex" style={{ fontSize: 9, letterSpacing: "0.32em", opacity: 0.6 }}>
+              {nowPlaying.origin === "generated" ? "+ WRITTEN FOR YOU" : "FROM THE STACKS"}
             </div>
-          );
-        })}
+            <div className="font-serif" style={{ fontSize: 24, lineHeight: 1.15, marginTop: 6 }}>
+              {nowPlaying.title}
+            </div>
+            <div className="font-plex" style={{ fontSize: 11, opacity: 0.7, marginTop: 4 }}>
+              {nowPlaying.freeformLabel}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Footer — library nudge */}
+      <a href="/library" style={{
+        display: "block", textAlign: "center",
+        fontFamily: "var(--font-mono)",
+        fontSize: 10, letterSpacing: "0.32em",
+        color: "var(--cream-60)",
+        padding: "8px 0",
+        borderTop: "1px solid rgba(255,179,71,0.15)",
+        textDecoration: "none",
+        transition: "color 180ms ease",
+      }} onMouseEnter={(e) => { e.currentTarget.style.color = "var(--amber)"; }}
+         onMouseLeave={(e) => { e.currentTarget.style.color = "var(--cream-60)"; }}>
+        {libraryCount} TRACKS IN THE ARCHIVE · /LIBRARY
+      </a>
+    </div>
+  );
+}
+
+function TranscriptLine({ who, text, amber = false }: { who: string; text: string; amber?: boolean }) {
+  return (
+    <div style={{
+      borderLeft: `2px solid ${amber ? "var(--amber)" : "rgba(242,234,211,0.35)"}`,
+      paddingLeft: 10,
+    }}>
+      <div className="font-mono" style={{
+        fontSize: 9, letterSpacing: "0.32em",
+        color: amber ? "var(--amber)" : "var(--cream-60)",
+      }}>{who}</div>
+      <div className="font-plex" style={{
+        fontSize: 13, lineHeight: 1.4,
+        color: "var(--cream)", fontStyle: amber ? "italic" : "normal",
+        marginTop: 3,
+      }}>
+        {text}
       </div>
     </div>
   );
