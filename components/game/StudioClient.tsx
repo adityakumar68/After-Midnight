@@ -11,6 +11,7 @@ import { createRecorder, type Recorder } from "@/lib/audio/recorder";
 import { attachMeter, type MeterTap } from "@/lib/audio/analyser";
 import { Sfx } from "@/lib/audio/sfx";
 import StudioDesign, { mapState } from "@/components/game/StudioDesign";
+import StudioMobile from "@/components/game/StudioMobile";
 
 const VIBE_LABEL: Record<string, string> = {
   "dusty-country":         "Dusty Country",
@@ -250,6 +251,29 @@ export default function StudioClient() {
         {djVoiceOn ? "● DJ VOICE ON" : "○ DJ VOICE OFF"}
       </button>
 
+      <div className="booth-mobile">
+        <StudioMobile
+          callState={mapState(game.callState)}
+          caller={
+            currentCaller
+              ? { name: currentCaller.name, age: currentCaller.age, location: currentCaller.location }
+              : { name: "—", age: 0, location: "—" }
+          }
+          callerVuLevel={callerLevel || undefined}
+          djVuLevel={djLevel || (recording ? 0.05 : 0)}
+          songs={designSongs}
+          callIndex={Math.min(game.roundIndex + 1, 3)}
+          callTotal={game.totalRounds}
+          clock={clock || ""}
+          onAnswer={onAnswer}
+          onPushToTalkStart={onPushToTalkStart}
+          onPushToTalkEnd={onPushToTalkEnd}
+          onPickSong={onPickSong}
+          onCueSong={() => game.requestSong()}
+        />
+      </div>
+
+      <div className="booth-desktop">
       <StudioDesign
         callState={mapState(game.callState)}
         caller={
@@ -268,6 +292,7 @@ export default function StudioClient() {
         onPushToTalkEnd={onPushToTalkEnd}
         onPickSong={onPickSong}
       />
+      </div>
     </>
   );
 }

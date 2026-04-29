@@ -415,3 +415,13 @@ a { color: inherit; text-decoration: none; }
   }
   .booth-page > :not(.mobile-only-warning) { display: none !important; }
 }
+
+/* Show only the desktop or mobile booth view based on viewport */
+.booth-desktop { display: block; }
+.booth-mobile  { display: none; }
+@media (max-width: 768px) {
+  .booth-desktop { display: none; }
+  .booth-mobile  { display: block; }
+  /* Hide the old "open on laptop" gate — mobile now has its own first-class layout */
+  .mobile-only-warning { display: none !important; }
+}

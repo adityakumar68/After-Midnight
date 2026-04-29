@@ -9,6 +9,7 @@ import { startDjSession, type AgentSession } from "@/lib/elevenlabs/agent";
 import { Sfx } from "@/lib/audio/sfx";
 import { DJS, type Dj } from "@/lib/game/djs";
 import CallerDesign from "@/components/game/CallerDesign";
+import CallerMobile from "@/components/game/CallerMobile";
 
 const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
@@ -232,18 +233,34 @@ export default function CallerClient() {
 
       {/* DJ is selected randomly — no picker UI. */}
 
-      <CallerDesign
-        callerState={game.callerState}
-        ptDown={recording}
-        onPtDown={onPtDown}
-        onPtUp={onPtUp}
-        onHangUp={onHangUp}
-        pendingVibe={game.pendingVibe}
-        nowPlaying={nowPlaying}
-        library={library}
-        flashSongId={flashId}
-        djName={chosenDj?.name ?? "DJ"}
-      />
+      <div className="booth-desktop">
+        <CallerDesign
+          callerState={game.callerState}
+          ptDown={recording}
+          onPtDown={onPtDown}
+          onPtUp={onPtUp}
+          onHangUp={onHangUp}
+          pendingVibe={game.pendingVibe}
+          nowPlaying={nowPlaying}
+          library={library}
+          flashSongId={flashId}
+          djName={chosenDj?.name ?? "DJ"}
+        />
+      </div>
+      <div className="booth-mobile">
+        <CallerMobile
+          callerState={game.callerState}
+          ptDown={recording}
+          onPtDown={onPtDown}
+          onPtUp={onPtUp}
+          onHangUp={onHangUp}
+          pendingVibe={game.pendingVibe}
+          nowPlaying={nowPlaying}
+          library={library}
+          flashSongId={flashId}
+          djName={chosenDj?.name ?? "DJ"}
+        />
+      </div>
     </>
   );
 }
