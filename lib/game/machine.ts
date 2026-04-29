@@ -34,6 +34,7 @@ export interface GameStore {
   endRound: (entry?: CallLogEntry) => void;
   reset: () => void;
   isShowOver: () => boolean;
+  setTotalRounds: (n: number) => void;
 }
 
 export function createGameMachine() {
@@ -58,6 +59,7 @@ export function createGameMachine() {
       })),
     reset: () => set({ callState: "idle", roundIndex: 0, chosenSongId: null, history: [] }),
     isShowOver: () => get().roundIndex >= get().totalRounds,
+    setTotalRounds: (n) => set({ totalRounds: Math.max(1, Math.min(5, Math.floor(n))) }),
   }));
 }
 

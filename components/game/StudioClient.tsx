@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useGame } from "@/lib/game/machine";
 import { drawThreeCallers, reactionFor, type Caller } from "@/lib/game/callers";
 import { threeSongsForCaller, type Song } from "@/lib/game/songs";
@@ -30,7 +30,16 @@ function nowClock(): string {
 
 export default function StudioClient() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const game = useGame();
+
+  // Read ?n= querystring once on mount and configure total rounds
+  useEffect(() => {
+    const raw = searchParams.get("n");
+    const parsed = raw ? parseInt(raw, 10) : NaN;
+    if (!isNaN(parsed)) game.setTotalRounds(parsed);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Defer all randomized state to the client mount to avoid SSR hydration mismatch
   const [callers, setCallers] = useState<Caller[]>([]);
   const [songs, setSongs] = useState<Song[]>([]);
@@ -87,7 +96,7 @@ export default function StudioClient() {
     if (!micGranted) return;
     if (!currentCaller) return;
     if (game.callState !== "idle") return;
-    if (game.isShowOver()) { router.push("/credits"); return; }
+    if (game.isShowOver()) { router.push("/dj-credits"); return; }
     const t = setTimeout(() => {
       Sfx.ring();
       game.startCall();

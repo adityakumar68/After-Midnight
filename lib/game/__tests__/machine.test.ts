@@ -67,4 +67,24 @@ describe("game machine", () => {
     }
     expect(store.getState().isShowOver()).toBe(true);
   });
+
+  it("setTotalRounds clamps to [1,5]", () => {
+    const s = store.getState();
+    s.setTotalRounds(2);
+    expect(store.getState().totalRounds).toBe(2);
+    s.setTotalRounds(99);
+    expect(store.getState().totalRounds).toBe(5);
+    s.setTotalRounds(0);
+    expect(store.getState().totalRounds).toBe(1);
+  });
+
+  it("isShowOver true after totalRounds rounds, regardless of value", () => {
+    store.getState().setTotalRounds(2);
+    const s = store.getState();
+    for (let i = 0; i < 2; i++) {
+      s.startCall(); s.answerCall(); s.personaReady(); s.requestSong();
+      s.pickSong("dusty-country-1"); s.songEnded(); s.endRound();
+    }
+    expect(store.getState().isShowOver()).toBe(true);
+  });
 });

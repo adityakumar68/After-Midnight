@@ -54,7 +54,7 @@ export default function CreditsPage() {
 
   const onPlayAgain = () => {
     game.reset();
-    router.push("/studio");
+    router.push("/dj");
   };
 
   return (
