@@ -40,6 +40,18 @@ export default function CallerClient() {
 
   useEffect(() => { lib.getState().hydrate(); }, [lib]);
 
+  // Auto-pick a random DJ once the mic is granted
+  const autoPickedRef = useRef(false);
+  useEffect(() => {
+    if (!micGranted) return;
+    if (chosenDj) return;
+    if (autoPickedRef.current) return;
+    autoPickedRef.current = true;
+    const random = DJS[Math.floor(Math.random() * DJS.length)];
+    void startCallFlow(random);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [micGranted]);
+
   async function grantMic() {
     try {
       const s = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -86,6 +98,18 @@ export default function CallerClient() {
     }
 
     if (!song) return;
+    // Stop any previous song before playing the next so they don't overlap
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.onended = null;
+      audioRef.current.src = "";
+      audioRef.current = null;
+    }
+    // Hang up the DJ immediately so the agent doesn't talk over the song
+    if (sessionRef.current) {
+      sessionRef.current.end().catch(() => {});
+      sessionRef.current = null;
+    }
     setNowPlaying(song);
     setFlashId(song.id);
     useCallerGame.getState().songReady(song.id);
@@ -97,7 +121,7 @@ export default function CallerClient() {
       useCallerGame.getState().songEnded();
       setTimeout(() => useCallerGame.getState().hangUp({
         vibe, songId: song!.id, songTitle: song!.title, origin: song!.origin,
-      }), 6000);
+      }), 4000);
     };
   }, []);
 
@@ -198,9 +222,7 @@ export default function CallerClient() {
         </div>
       )}
 
-      {micGranted && !chosenDj && (
-        <DjPicker djs={DJS} onPick={startCallFlow} />
-      )}
+      {/* DJ is selected randomly — no picker UI. */}
 
       <CallerDesign
         callerState={game.callerState}
