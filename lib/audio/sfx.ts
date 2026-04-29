@@ -28,4 +28,20 @@ export const Sfx = {
   static:  () => { const a = get("static", false, 0.4);   a.currentTime = 0; void a.play().catch(() => {}); },
   roomtone:() => { const a = get("roomtone", true, 0.25); void a.play().catch(() => {}); return () => a.pause(); },
   stopAll: () => { for (const a of cache.values()) { a.pause(); a.currentTime = 0; } },
+  /**
+   * Eager-create + warm every SFX HTMLAudioElement during the user gesture.
+   * Mobile browsers reject `.play()` on Audio elements that weren't created
+   * inside a gesture handler — this primes each one with a silent play+pause
+   * so later programmatic `.play()` (after our dial/ring delay) actually works.
+   */
+  prewarm: async () => {
+    const keys = Object.keys(SOURCES) as SfxKey[];
+    for (const k of keys) {
+      const a = get(k);
+      a.muted = true;
+      try { await a.play(); a.pause(); a.currentTime = 0; }
+      catch (e) { console.warn(`[sfx-prewarm] ${k} failed:`, e); }
+      a.muted = false;
+    }
+  },
 };

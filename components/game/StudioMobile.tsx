@@ -303,44 +303,45 @@ export default function StudioMobile({
           </div>
         )}
 
-        {/* Stacks drawer — same library as Caller Mode. Visible always (when not picking). */}
-        {library && library.length > 0 && callState !== "song_select" && (
-          <StacksDrawer library={library} latestGeneratedId={latestGeneratedId ?? null} />
+        {/* Stacks drawer — same library as Caller Mode. Tappable to pick a song. */}
+        {library && library.length > 0 && callState !== "song_playing" && callState !== "caller_reaction" && (
+          <StacksDrawer
+            library={library}
+            latestGeneratedId={latestGeneratedId ?? null}
+            onPick={(id) => onPickSong?.(id)}
+            tappable={callState === "conversation" || callState === "song_select"}
+          />
         )}
       </main>
     </Booth>
   );
 }
 
-function StacksDrawer({ library, latestGeneratedId }: {
+function StacksDrawer({ library, latestGeneratedId, onPick, tappable }: {
   library: LibrarySong[]; latestGeneratedId: string | null;
+  onPick: (id: string) => void; tappable: boolean;
 }) {
-  const recent = library.slice().reverse().slice(0, 6);
+  // Show the full library (newest first) — drawer scrolls.
+  const all = library.slice().reverse();
   return (
     <section style={{
       background: "#1a0f08",
       border: "1px solid rgba(255,179,71,0.15)",
       borderRadius: 8, padding: 10,
-      maxHeight: 180, overflowY: "auto",
+      maxHeight: 280, overflowY: "auto",
       display: "flex", flexDirection: "column", gap: 6,
       WebkitOverflowScrolling: "touch",
       marginTop: 8,
     }}>
       <span className="font-plex" style={{
         fontSize: 10, letterSpacing: "0.32em", color: "var(--cream-30)",
-      }}>RECORD STACKS · {library.length}</span>
-      {recent.map((s) => {
+      }}>
+        RECORD STACKS · {library.length}{tappable ? " · TAP TO CUE" : ""}
+      </span>
+      {all.map((s) => {
         const isFreshGen = s.id === latestGeneratedId;
-        return (
-          <div key={s.id} style={{
-            background: isFreshGen
-              ? "linear-gradient(180deg, #f2ead3 0%, #e6dcc0 100%)"
-              : "rgba(255,179,71,0.06)",
-            color: isFreshGen ? "#2a1a0f" : "var(--cream)",
-            padding: "6px 10px", borderRadius: 3,
-            border: "1px solid " + (isFreshGen ? "#c8b58a" : "rgba(255,179,71,0.18)"),
-            fontFamily: "var(--font-plex)", fontSize: 11,
-          }}>
+        const card = (
+          <>
             <div style={{ fontWeight: 600 }}>{s.title}</div>
             <div style={{
               fontSize: 9, opacity: 0.6, letterSpacing: "0.2em",
@@ -348,8 +349,28 @@ function StacksDrawer({ library, latestGeneratedId }: {
             }}>
               {isFreshGen ? "+ WRITTEN FOR YOU" : "FROM THE STACKS"} · {s.freeformLabel}
             </div>
-          </div>
+          </>
         );
+        const baseStyle: React.CSSProperties = {
+          background: isFreshGen
+            ? "linear-gradient(180deg, #f2ead3 0%, #e6dcc0 100%)"
+            : "rgba(255,179,71,0.06)",
+          color: isFreshGen ? "#2a1a0f" : "var(--cream)",
+          padding: "8px 10px", borderRadius: 3,
+          border: "1px solid " + (isFreshGen ? "#c8b58a" : "rgba(255,179,71,0.18)"),
+          fontFamily: "var(--font-plex)", fontSize: 11,
+          textAlign: "left", width: "100%",
+        };
+        if (tappable) {
+          return (
+            <button key={s.id} onClick={() => onPick(s.id)} style={{
+              ...baseStyle, cursor: "pointer",
+            }}>
+              {card}
+            </button>
+          );
+        }
+        return <div key={s.id} style={baseStyle}>{card}</div>;
       })}
     </section>
   );

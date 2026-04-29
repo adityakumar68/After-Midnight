@@ -367,13 +367,14 @@ function PencilWriting() {
 function LibraryDrawer({ library, flashSongId, latestGeneratedId }: {
   library: LibrarySong[]; flashSongId: string | null; latestGeneratedId: string | null;
 }) {
-  const recent = library.slice().reverse().slice(0, 10);
+  // Show every track — the drawer scrolls so even 20+ entries are reachable.
+  const all = library.slice().reverse();
   return (
     <section style={{
       background: "#1a0f08",
       border: "1px solid rgba(255,179,71,0.15)",
       borderRadius: 8, padding: 12,
-      maxHeight: 220, overflowY: "auto",
+      maxHeight: 280, overflowY: "auto",
       display: "flex", flexDirection: "column", gap: 6,
       WebkitOverflowScrolling: "touch",
     }}>
@@ -386,7 +387,7 @@ function LibraryDrawer({ library, flashSongId, latestGeneratedId }: {
           color: "var(--cream-30)",
         }}>RECORD STACKS · {library.length}</span>
       </div>
-      {recent.map((s) => {
+      {all.map((s) => {
         const flash = s.id === flashSongId;
         // Only the freshest generated song wears the "WRITTEN FOR YOU" cream paper.
         // Previously generated tracks fade back into the regular dark "FROM THE STACKS" treatment.

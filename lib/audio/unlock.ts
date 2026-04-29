@@ -1,5 +1,7 @@
 "use client";
 
+import { Sfx } from "./sfx";
+
 /**
  * Mobile browsers (iOS Safari, Android Chrome) require a user gesture before
  * any audio can play. Async/delayed audio (timeouts, fetch responses, blob URLs)
@@ -11,6 +13,8 @@
  *   2. Plays a tiny silent buffer through it so iOS marks it "started".
  *   3. Plays + pauses an `HTMLAudioElement` so subsequent `new Audio()` calls
  *      inherit the same activation.
+ *   4. Pre-creates every SFX audio element so phone-ring / on-air buzzer
+ *      can play after the dial/ring delay even when the gesture has lapsed.
  *
  * Idempotent: only runs once per session.
  */
@@ -55,6 +59,14 @@ export async function unlockAudio(): Promise<void> {
     a.pause();
   } catch (e) {
     console.warn("[audio-unlock] HTMLAudioElement primer failed:", e);
+  }
+
+  // 3. SFX prewarm — every ring / onair / static / roomtone clip gets created
+  // and played-then-paused inside the gesture so it can fire later async.
+  try {
+    await Sfx.prewarm();
+  } catch (e) {
+    console.warn("[audio-unlock] SFX prewarm failed:", e);
   }
 }
 
