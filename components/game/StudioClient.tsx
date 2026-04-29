@@ -115,6 +115,8 @@ export default function StudioClient() {
         onConnect: () => game.personaReady(),
         onError: (e) => console.error("agent error", e),
       });
+      // Start muted: caller can't hear ambient noise. DJ unmutes only while PTT held.
+      sessionRef.current.setMicMuted(true);
     } catch (e) {
       console.error("agent start failed", e);
       // Fall through so the UI is still functional without a key
@@ -129,11 +131,13 @@ export default function StudioClient() {
     await recRef.current.start();
     const stream = recRef.current.getStream();
     if (stream && !meterRef.current) meterRef.current = attachMeter(stream);
+    sessionRef.current?.setMicMuted(false); // open the line — caller hears the DJ
   }, [recording]);
 
   const onPushToTalkEnd = useCallback(async () => {
     if (!recording || !recRef.current) return;
     setRecording(false);
+    sessionRef.current?.setMicMuted(true); // close the line — caller stops hearing
     const raw = await recRef.current.stop();
     if (!djVoiceOn) return; // toggle off → skip the playback echo entirely
     transformToDjVoice(raw)

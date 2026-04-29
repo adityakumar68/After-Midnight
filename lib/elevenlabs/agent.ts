@@ -5,6 +5,7 @@ import type { Caller } from "@/lib/game/callers";
 export interface AgentSession {
   end: () => Promise<void>;
   setVolume: (v: number) => void;
+  setMicMuted: (muted: boolean) => void;
 }
 
 export interface AgentEvents {
@@ -58,6 +59,7 @@ async function _startSession({ overrides, events = {}, clientTools }: StartSessi
   return {
     end: () => conv.endSession(),
     setVolume: (v) => conv.setVolume({ volume: v }),
+    setMicMuted: (muted) => conv.setMicMuted(muted),
   };
 }
 

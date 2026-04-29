@@ -150,8 +150,10 @@ export default function CallerClient() {
         },
         onPlaySong: handlePlaySong,
       });
+      // Start muted: the DJ should not hear ambient noise. Unmute only while PTT held.
+      sessionRef.current.setMicMuted(true);
       useCallerGame.getState().djSpoke();
-      console.log("[caller] DJ session started → conversation");
+      console.log("[caller] DJ session started → conversation (mic muted by default)");
     } catch (e) {
       console.error("[caller] DJ session failed", e);
       useCallerGame.getState().djSpoke();
@@ -166,8 +168,14 @@ export default function CallerClient() {
     setTimeout(() => router.push("/caller-credits"), 1200);
   }, [game.callerState, router]);
 
-  const onPtDown = useCallback(() => setRecording(true), []);
-  const onPtUp = useCallback(() => setRecording(false), []);
+  const onPtDown = useCallback(() => {
+    setRecording(true);
+    sessionRef.current?.setMicMuted(false); // open the line — DJ hears you
+  }, []);
+  const onPtUp = useCallback(() => {
+    setRecording(false);
+    sessionRef.current?.setMicMuted(true); // close the line — DJ stops hearing
+  }, []);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
