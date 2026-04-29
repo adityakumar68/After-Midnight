@@ -74,14 +74,14 @@ export default function Landing() {
             </button>
           </div>
 
-          <div style={{
-            marginTop: 86, display: "flex", flexDirection: "column",
+          <div className="lnr-built-block" style={{
+            display: "flex", flexDirection: "column",
             alignItems: "center", gap: 14,
             animation: "fade-in 1.5s 2.6s ease-out both",
           }}>
             <VuBar width={260} height={10} freq={0.2} />
-            <div className="font-mono tracked" style={{
-              fontSize: 11, color: "var(--cream-30)", letterSpacing: "0.3em",
+            <div className="font-mono tracked lnr-built-text" style={{
+              color: "var(--cream-60)", letterSpacing: "0.3em",
             }}>
               BUILT FOR ELEVENHACKS #6 &nbsp;·&nbsp; ZED × ELEVENLABS
             </div>
