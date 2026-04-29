@@ -59,10 +59,11 @@ export default function CallerClient() {
 
     if (!song) {
       const prompt = expandPrompt(vibe);
+      console.log("[caller] generating song:", { vibe, prompt });
       const r = await fetch("/api/generate-song", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt, lengthMs: 60000 }),
       });
       if (!r.ok) {
         console.error("[caller] generate-song failed", r.status);
@@ -77,7 +78,7 @@ export default function CallerClient() {
           freeformLabel: vibe,
           src,
           origin: "generated",
-          durationSec: 15,
+          durationSec: 60,
         };
         cmLib.addGenerated(newSong);
         song = newSong;

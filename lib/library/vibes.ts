@@ -48,12 +48,17 @@ export function expandPrompt(freeform: string): string {
   const lc = freeform.toLowerCase();
   const adds: string[] = [];
   if (/\brainy?\b/.test(lc) || /\brain\b/.test(lc)) adds.push("with rain ambience");
-  if (/country|trucker|road|western|americana/.test(lc)) adds.push("slide steel guitar, brushed snare");
-  if (/synth|wave|neon|80s/.test(lc)) adds.push("breathy pads, slow analog arpeggios");
-  if (/lullaby|child|sleep/.test(lc)) adds.push("felt piano, music box, very tender");
-  if (/lo-?fi|cozy|jazz|jazzy|mellow/.test(lc)) adds.push("vinyl crackle, soft jazz keys, warm tape hiss");
-  if (/heartbreak|sad|aching|cry|cried|crying/.test(lc)) adds.push("aching but pretty");
-  const base = `${freeform.trim()}, instrumental, no vocals, 15 seconds`;
+  if (/country|trucker|road|western|americana/.test(lc)) adds.push("slide steel guitar, brushed snare, gravelly male voice singing about lonely highways");
+  if (/synth|wave|neon|80s/.test(lc)) adds.push("breathy pads, slow analog arpeggios, soft female voice singing about lost love");
+  if (/lullaby|child|sleep/.test(lc)) adds.push("felt piano, music box, gentle hummed vocals, very tender");
+  if (/lo-?fi|cozy|jazz|jazzy|mellow/.test(lc)) adds.push("vinyl crackle, soft jazz keys, warm tape hiss, mellow vocals");
+  if (/heartbreak|sad|aching|cry|cried|crying/.test(lc)) adds.push("aching but pretty, vulnerable vocals with a few sung lyrics");
+  // Default to vocals unless caller explicitly says instrumental
+  const wantsInstrumental = /\binstrumental\b|\bno vocals?\b/.test(lc);
+  const vocalSuffix = wantsInstrumental
+    ? ", instrumental, no vocals"
+    : ", with soft vocals and a verse and a chorus, the lyrics should fit the mood";
+  const base = `${freeform.trim()}, 60 seconds${vocalSuffix}`;
   return adds.length ? `${base}, ${adds.join(", ")}, late-night 3 AM character` : `${base}, late-night 3 AM character`;
 }
 

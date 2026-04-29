@@ -29,11 +29,15 @@ describe("scoreMatch", () => {
 });
 
 describe("expandPrompt", () => {
-  it("appends instrumental + 15s suffix", () => {
+  it("appends 60s duration and vocals direction by default", () => {
     const out = expandPrompt("late night jazz noir");
     expect(out).toContain("late night jazz noir");
+    expect(out).toMatch(/60 seconds/i);
+    expect(out).toMatch(/vocals|verse|chorus|lyrics/i);
+  });
+  it("respects an explicit instrumental request", () => {
+    const out = expandPrompt("instrumental piano lullaby");
     expect(out).toMatch(/instrumental/i);
-    expect(out).toMatch(/15 seconds/i);
     expect(out).toMatch(/no vocals/i);
   });
   it("adds rain ambience when 'rainy' is present", () => {
