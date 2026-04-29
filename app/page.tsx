@@ -16,20 +16,18 @@ export default function Landing() {
           display: "flex", flexDirection: "column", alignItems: "center",
           textAlign: "center", position: "relative", zIndex: 10,
         }}>
-          <div style={{ marginBottom: 22 }}>
+          <div className="lnr-lamp-wrap">
             <OnAirLamp state="pulse" size={26} />
           </div>
-          <div className="font-mono tracked" style={{
-            fontSize: 13, color: "var(--cream-60)",
-            letterSpacing: "0.36em", marginBottom: 38,
+          <div className="font-mono tracked lnr-pretitle" style={{
+            color: "var(--cream-60)",
             animation: "fade-in 1.4s ease-out both",
           }}>
             AFTER MIDNIGHT &nbsp;—&nbsp; A RADIO SHOW
           </div>
 
-          <h1 className="font-serif type-grain" style={{
+          <h1 className="font-serif type-grain lnr-title" style={{
             margin: 0,
-            fontSize: "clamp(48px, 9.5vw, 112px)",
             lineHeight: 0.95,
             color: "var(--cream)",
             fontWeight: 400,
@@ -40,16 +38,16 @@ export default function Landing() {
             <TitleReveal text="After Midnight" />
           </h1>
 
-          <p style={{
-            marginTop: 28, fontSize: 18, fontStyle: "italic",
-            color: "var(--cream)", opacity: 0.85, lineHeight: 1.45, maxWidth: 560,
+          <p className="lnr-subtitle" style={{
+            fontStyle: "italic",
+            color: "var(--cream)", opacity: 0.85, maxWidth: 560,
             animation: "fade-up 1.2s 1.4s ease-out both",
           }}>
             Some nights you host the show. Some nights you call in. Either way, the booth&apos;s still warm at 3 AM.
           </p>
 
-          <div style={{
-            marginTop: 50, display: "flex", gap: 18, alignItems: "stretch",
+          <div className="lnr-cta-row" style={{
+            display: "flex", gap: 18, alignItems: "stretch",
             flexWrap: "wrap", justifyContent: "center",
             animation: "fade-up 1.2s 2.0s ease-out both",
           }}>
