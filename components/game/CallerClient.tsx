@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCallerGame } from "@/lib/game/callerMachine";
 import { useLibrary, type LibrarySong } from "@/lib/library/songLibrary";
@@ -27,6 +27,12 @@ export default function CallerClient() {
   const [nowPlaying, setNowPlaying] = useState<LibrarySong | null>(null);
   const sessionRef = useRef<AgentSession | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Subscribe to the two stable underlying arrays — concat them in render via useMemo
+  // (avoids the infinite-loop trap of selecting a function-derived new array on each render)
+  const baked = lib((s) => s.baked);
+  const generated = lib((s) => s.generated);
+  const library = useMemo(() => [...baked, ...generated], [baked, generated]);
 
   useEffect(() => { lib.getState().hydrate(); }, [lib]);
 
@@ -186,7 +192,7 @@ export default function CallerClient() {
         onHangUp={onHangUp}
         pendingVibe={game.pendingVibe}
         nowPlaying={nowPlaying}
-        library={lib((s) => s.all())}
+        library={library}
         flashSongId={flashId}
       />
     </>
