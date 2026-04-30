@@ -133,6 +133,9 @@ export default function CallerClient() {
 
   // Event-driven orchestration (NOT useEffect): triggered when user picks a DJ.
   // Avoids React strict-mode double-invoke and state-dep cancellation traps.
+  // Ring keeps playing until the agent actually picks up — no fixed ringing
+  // timer, so a slow connection rings longer and a fast one rings less. We
+  // floor at 1.5s so the ring is always audible for atmosphere.
   const startCallFlow = useCallback(async (dj: Dj) => {
     if (orchestrationStartedRef.current) return;
     orchestrationStartedRef.current = true;
@@ -141,14 +144,15 @@ export default function CallerClient() {
     Sfx.ring();
     await wait(2200);
     useCallerGame.getState().dialingDone();
-    console.log("[caller] dialing done → ringing");
-    await wait(2000);
-    useCallerGame.getState().ringingDone();
-    Sfx.stopAll();
-    Sfx.onair();
-    console.log("[caller] ringing done → connecting agent");
+    console.log("[caller] dialing → ringing (waiting for host to pick up)");
+
+    // Kick off the agent connection NOW. The phone keeps ringing until this
+    // resolves. Floor at 1.5s so a cached/instant connection still feels like
+    // a real ring.
+    const minRing = wait(1500);
+    let session: Awaited<ReturnType<typeof startDjSession>>;
     try {
-      sessionRef.current = await startDjSession({
+      session = await startDjSession({
         dj,
         events: {
           onConnect: () => console.log("[caller] agent connected"),
@@ -158,14 +162,26 @@ export default function CallerClient() {
         },
         onPlaySong: handlePlaySong,
       });
-      // Start muted: the DJ should not hear ambient noise. Unmute only while PTT held.
-      sessionRef.current.setMicMuted(true);
-      useCallerGame.getState().djSpoke();
-      console.log("[caller] DJ session started → conversation (mic muted by default)");
     } catch (e) {
       console.error("[caller] DJ session failed", e);
+      Sfx.stopAll();
+      useCallerGame.getState().ringingDone();
       useCallerGame.getState().djSpoke();
+      return;
     }
+
+    // Hold the ring through the minimum-ring floor, then "pick up".
+    await minRing;
+    sessionRef.current = session;
+    Sfx.stopAll();
+    Sfx.onair();
+    useCallerGame.getState().ringingDone();
+    console.log("[caller] picked up → on air");
+
+    // Start muted: the DJ should not hear ambient noise. Unmute only while PTT held.
+    sessionRef.current.setMicMuted(true);
+    useCallerGame.getState().djSpoke();
+    console.log("[caller] DJ session started → conversation (mic muted by default)");
   }, [handlePlaySong]);
 
   useEffect(() => {
