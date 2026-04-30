@@ -249,6 +249,7 @@ export default function StudioClient() {
       <button
         onClick={() => setDjVoiceOn((v) => !v)}
         title="Transforms your voice into the DJ voice for the listener. Adds ~800ms playback echo for the player. Turn on for demo recordings."
+        className="dj-voice-toggle"
         style={{
           position: "fixed",
           top: 16,

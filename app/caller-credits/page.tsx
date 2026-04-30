@@ -10,11 +10,16 @@ export default function CallerCredits() {
   const game = useCallerGame();
   const last = game.history.at(-1);
 
-  const allSongs = useLibrary((s) => [...s.baked, ...s.generated]);
-  const lastSong = useMemo(
-    () => (last ? allSongs.find((s) => s.id === last.songId) ?? null : null),
-    [allSongs, last]
-  );
+  const baked = useLibrary((s) => s.baked);
+  const generated = useLibrary((s) => s.generated);
+  const lastSong = useMemo(() => {
+    if (!last) return null;
+    return (
+      baked.find((s) => s.id === last.songId) ??
+      generated.find((s) => s.id === last.songId) ??
+      null
+    );
+  }, [baked, generated, last]);
 
   const [shareMsg, setShareMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState<"share" | "download" | null>(null);
