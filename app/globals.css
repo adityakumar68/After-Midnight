@@ -536,9 +536,12 @@ a { color: inherit; text-decoration: none; }
     min-height: 100% !important;
     -webkit-overflow-scrolling: touch;
   }
-  /* Mobile booth main containers: become scrollable instead of fixed */
+  /* Mobile booth main containers: become scrollable instead of fixed.
+     Use `relative` (not `static`) so the inline `z-index: 10` keeps content
+     above the `.booth-floor` fixed backdrop (z-index: 0) — `position: static`
+     silently ignores z-index, which lets booth-floor paint over the buttons. */
   .booth-mobile main {
-    position: static !important;
+    position: relative !important;
     inset: auto !important;
     min-height: 100vh;
   }
@@ -681,4 +684,8 @@ body:has(.library-page) {
 }
 .library-footer {
   text-align: center; margin-top: 60px;
+}
+
+@media (max-width: 768px) {
+  .dj-voice-toggle { display: none !important; }
 }
