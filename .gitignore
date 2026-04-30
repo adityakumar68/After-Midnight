@@ -54,3 +54,9 @@ midnight-content/
 
 # Raw nano-banana logo source dir (cleaned versions live in public/logo/)
 logo-content-nano-banana/
+
+# Standalone design mockup / prompt brief — kept locally for reference only.
+elevenlabs-design/
+
+# Local social-post drafts.
+posts/
