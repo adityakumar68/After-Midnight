@@ -34,18 +34,23 @@ pnpm-debug.log*
 # Audio assets are committed so Vercel deploys them.
 # Re-bake with `npm run bake:songs` and `npm run bake:sfx` to regenerate.
 
-# Video render artifacts (huge mp4 outputs)
-media/video/*.mp4
-media/video/.hyperframes/
-media/video/assets/personal.mp4
-media/video/assets/platform-*.mp4
+# HyperFrames demo-video work — keep the FINAL render at repo root as demo.mp4
+# instead. The composition + intermediate audio/clips/scripts stay local.
+media/video/
+recordings/
+scripts/bake-demo-assets.ts
+scripts/bake-vo-chunks.ts
+
+# Raw cover-image variants (Gemini export + intermediate dewatermark files).
+# The final compressed cover lives at public/cover.jpg.
+cover-image*.png
+cover-image-clean*
 
 # Raw Gemini-generated images (renamed copies live in media/video/assets/)
 images-midnight/
 
 # User's local content drop folder (sources for AI-generated assets)
 midnight-content/
-media/video/work-*/
 
 # Raw nano-banana logo source dir (cleaned versions live in public/logo/)
 logo-content-nano-banana/
